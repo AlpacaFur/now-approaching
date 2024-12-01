@@ -19,7 +19,6 @@ a, p {
 
 p {
   margin: 0;
-  filter: blur(1px);
   line-height: 1.7ex;
 }
 
@@ -28,6 +27,7 @@ p {
     font-size: 24px;
     filter: blur(0.5px);
     text-shadow: 0px 0px 15px rgb(255, 162, 31);
+    transform: translate3d(0, 0, 0);
   }
   a:hover {
     padding-bottom: 2px;
@@ -59,6 +59,18 @@ p {
   a:hover {
     padding-bottom: 6px;
     border-bottom: 4px dotted rgb(255, 162, 31);
+  }
+}
+
+@supports (-webkit-hyphens:none) { 
+  p {
+    filter: blur(0.75px) brightness(1.2);
+  }
+}
+
+@supports (-webkit-touch-callout:none) { 
+  p {
+    filter: blur(0.5px) brightness(2);
   }
 }
 
