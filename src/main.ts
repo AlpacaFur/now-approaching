@@ -138,7 +138,11 @@ function minutesUntilTime(time: StandardTime): number {
   const currentHour = new Date().getHours()
   const currentMinute = new Date().getMinutes()
 
-  const dayOffset = currentHour > time.hour ? 60 * 24 : 0
+  const dayOffset =
+    currentHour > time.hour ||
+    (currentHour === time.hour && currentMinute > time.min)
+      ? 60 * 24
+      : 0
 
   return dayOffset + (time.hour - currentHour) * 60 + (time.min - currentMinute)
 }
