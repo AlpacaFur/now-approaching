@@ -103,11 +103,11 @@ const data: Entry[] = [
     times: [
       {
         hour: 2,
-        min: 56,
+        min: 55,
       },
       {
         hour: 14,
-        min: 56,
+        min: 55,
       },
     ],
   },
