@@ -1,5 +1,9 @@
 import "./style.css"
 
+if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
+  console.log("removing")
+  document.body.classList.remove("fadein")
+}
 interface StandardTime {
   hour: number
   min: number
