@@ -115,6 +115,20 @@ const data: Entry[] = [
       },
     ],
   },
+  {
+    name: "Make a Seq.",
+    url: "https://sequence.breq.dev",
+    times: [
+      {
+        hour: 0,
+        min: 34,
+      },
+      {
+        hour: 12,
+        min: 34,
+      },
+    ],
+  },
 ]
 
 function nextRealOccurrence(time: Time): StandardTime {
@@ -225,39 +239,41 @@ function regenerateList() {
       return minutesUntilTime(timeA) - minutesUntilTime(timeB)
     })
 
-  const elems = sortedInstances.map(({ entry, time }, index) => {
-    const p = document.createElement("p")
-    const a = document.createElement("a")
-    a.href = entry.url
-    a.target = "_blank"
-    a.textContent = entry.name
+  const elems = sortedInstances
+    .map(({ entry, time }, index) => {
+      const p = document.createElement("p")
+      const a = document.createElement("a")
+      a.href = entry.url
+      a.target = "_blank"
+      a.textContent = entry.name
 
-    const minutesLeft = minutesUntilTime(time)
-    const remainingLabel = generateTimeLabel(minutesLeft)
+      const minutesLeft = minutesUntilTime(time)
+      const remainingLabel = generateTimeLabel(minutesLeft)
 
-    if (index === 0) {
-      document.title = "Next in: " + remainingLabel
-    }
+      if (index === 0) {
+        document.title = "Next in: " + remainingLabel
+      }
 
-    const timeLabel = timeDisplay(time)
+      const timeLabel = timeDisplay(time)
 
-    const remaining = charWidth - entry.name.length
+      const remaining = charWidth - entry.name.length
 
-    const wrapperSpan = document.createElement("span")
-    wrapperSpan.classList.add("switch-wrapper")
+      const wrapperSpan = document.createElement("span")
+      wrapperSpan.classList.add("switch-wrapper")
 
-    const timeUntil = document.createElement("span")
-    timeUntil.textContent = remainingLabel.padStart(remaining, NBSP)
+      const timeUntil = document.createElement("span")
+      timeUntil.textContent = remainingLabel.padStart(remaining, NBSP)
 
-    const timeAt = document.createElement("span")
-    timeAt.textContent = timeLabel.padStart(remaining, NBSP)
+      const timeAt = document.createElement("span")
+      timeAt.textContent = timeLabel.padStart(remaining, NBSP)
 
-    wrapperSpan.append(timeUntil, timeAt)
+      wrapperSpan.append(timeUntil, timeAt)
 
-    p.append(a, wrapperSpan)
+      p.append(a, wrapperSpan)
 
-    return p
-  })
+      return p
+    })
+    .slice(0, 7)
 
   const currentTime = currentTimeDisplay()
 
