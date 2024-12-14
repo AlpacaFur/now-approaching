@@ -1,5 +1,5 @@
-import { CHARS, FONT } from "./font/font"
-import { base64ToBinary } from "./font/helpers"
+import { CHARS, FONT } from "../../font/font"
+import { base64ToBinary } from "../../font/helpers"
 import "./grid.css"
 
 const SKEW = 5

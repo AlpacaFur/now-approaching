@@ -1,6 +1,6 @@
 import "./canvas.css"
-import { CHARS } from "../font/font"
-import { base64ToImageData, imageDataToBitmapBase64 } from "../font/helpers"
+import { CHARS } from "../../font/font"
+import { base64ToImageData, imageDataToBitmapBase64 } from "../../font/helpers"
 
 const canvas = document.createElement("canvas")
 canvas.width = 190

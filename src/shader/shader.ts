@@ -1,4 +1,3 @@
-import "../style.css"
 import {
   WebGLRenderer,
   Scene,
