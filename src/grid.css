@@ -1,0 +1,76 @@
+body {
+  background: black;
+  color: white;
+  font-family: sans-serif;
+  margin: 0;
+  overflow: hidden;
+}
+
+.container {
+  height: 100dvh;
+  width: 100dvw;
+  box-sizing: border-box;
+  display: flex;
+}
+.pairing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pairing > p {
+  margin: 0;
+}
+
+canvas {
+  image-rendering: pixelated;
+}
+
+#background {
+  filter: blur(1.5px);
+}
+
+#foreground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: blur(1.4px) brightness(1.7);
+  background-color: #000000;
+}
+
+.overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  /* background: linear-gradient(
+    -45deg,
+    violet,
+    indigo,
+    blue,
+    green,
+    yellow,
+    orange,
+    red
+  );
+  background: linear-gradient(
+    -45deg,
+    pink,
+    dodgerblue,
+    white,
+    dodgerblue,
+    pink
+  );
+  background: linear-gradient(
+    -45deg,
+    #d52d00,
+    #ef7627,
+    #ff9a56,
+    white,
+    #d162a4,
+    #d55690,
+    #a30262
+  );
+  mix-blend-mode: hue;
+  top: 0;
+  left: 0; */
+}
