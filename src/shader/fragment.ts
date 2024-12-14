@@ -7,6 +7,7 @@ uniform float BRIGHTEN;
 uniform float BLUR_DISTANCE;
 uniform float SECOND_BLUR_DISTANCE;
 uniform bool SHOW_PIXELS;
+uniform float WIPE_POSITION;
 
 varying vec2 v_uv;
 
@@ -85,7 +86,10 @@ void main()
     vec2 cellTopLeft = vec2(floor(coord.x / SKEW) * SKEW, floor(coord.y / SKEW) * SKEW);
     vec2 cellCenter = cellTopLeft + SKEW/2.0;
     vec4 tex = texture(u_texture, cellCenter/u_output_resolution);
-    if (SHOW_PIXELS) {
+    float ratio = u_output_resolution.x/u_output_resolution.y;
+    float maxRatio = max(u_output_resolution.x, u_output_resolution.y)/min(u_output_resolution.x, u_output_resolution.y);
+    float canvasHyp = distance(vec2(0.0, 0.0), u_output_resolution)/max(u_output_resolution.x, u_output_resolution.y);
+    if (SHOW_PIXELS || distance(vec2(0.5, 0.5/ratio), vec2(uv.x, (1.0-uv.y)/ratio)) < WIPE_POSITION * canvasHyp / 2.0) {
         gl_FragColor = vec4(tex.rgb, 1.0);
         return;
     }

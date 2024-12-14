@@ -154,3 +154,5 @@ export const FONT = {
 }
 
 export const CHARS = Object.keys(FONT) as Array<keyof typeof FONT>
+
+export type CHAR = keyof typeof FONT

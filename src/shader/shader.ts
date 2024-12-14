@@ -14,6 +14,7 @@ import {
 } from "three"
 import { FRAGMENT_SHADER } from "./fragment"
 import { VERTEX_SHADER } from "./vertex"
+import { animationStep } from "../animation"
 
 const SKEW = 5.00001 * devicePixelRatio
 const RADIUS = SKEW * 0.4
@@ -21,7 +22,11 @@ const BRIGHTEN = 1.5
 const BLUR_DISTANCE = SKEW * 1.0
 const SECOND_BLUR_DISTANCE = SKEW * 2.4
 
-type Updater = (data: Uint8ClampedArray, width: number, height: number) => void
+export type Updater = (
+  data: Uint8ClampedArray,
+  width: number,
+  height: number
+) => void
 
 function roundedRendererDims(skew: number): [number, number] {
   return [
@@ -36,6 +41,8 @@ export function setupRenderer() {
   renderer.setSize(...roundedRendererDims(SKEW))
 
   let lastUpdater: Updater = () => undefined
+
+  let wipeDirection = -1
 
   const scene = new Scene()
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
@@ -81,6 +88,9 @@ export function setupRenderer() {
     },
     SHOW_PIXELS: {
       value: false,
+    },
+    WIPE_POSITION: {
+      value: 0.0,
     },
   }
 
@@ -155,7 +165,14 @@ export function setupRenderer() {
     return texture
   }
 
+  function clearTexture() {
+    for (let i = 0; i < data.length; i += 1) {
+      data[i] = 0
+    }
+  }
+
   function updateTexture(updater: Updater) {
+    clearTexture()
     updater(data, texture.image.width, texture.image.height)
     texture.needsUpdate = true
     lastUpdater = updater
@@ -167,8 +184,27 @@ export function setupRenderer() {
   }
 
   function toggleShowPixels() {
-    uniforms.SHOW_PIXELS.value = !uniforms.SHOW_PIXELS.value
-    render()
+    wipeDirection *= -1
+    animateWipe()
+  }
+
+  function rerender() {
+    updateTexture(lastUpdater)
+  }
+
+  function animateWipe() {
+    requestAnimationFrame(
+      animationStep(
+        uniforms.WIPE_POSITION.value,
+        wipeDirection === 1 ? 1 : 0,
+        500,
+        null,
+        (value) => {
+          uniforms.WIPE_POSITION.value = value
+          render()
+        }
+      )
+    )
   }
 
   function adjustBlur(dir: 1 | -1) {
@@ -177,5 +213,18 @@ export function setupRenderer() {
     render()
   }
 
-  return { render, updateTexture, getCanvas, toggleShowPixels, adjustBlur }
+  function adjustWipe(dir: 1 | -1) {
+    uniforms.WIPE_POSITION.value += dir * 0.05
+    render()
+  }
+
+  return {
+    render,
+    rerender,
+    updateTexture,
+    getCanvas,
+    toggleShowPixels,
+    adjustBlur,
+    adjustWipe,
+  }
 }

@@ -1,6 +1,4 @@
 import "./style.css"
-import { renderRows } from "./shader/texture-drawing"
-import { setupRenderer } from "./shader/shader"
 
 if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
   console.log("removing")
@@ -133,25 +131,6 @@ const data: Entry[] = [
   },
 ]
 
-export interface RenderConfig {
-  rainbow: boolean
-  filled: boolean
-}
-
-const renderConfig: RenderConfig = {
-  rainbow: false,
-  filled: false,
-}
-
-const {
-  updateTexture,
-  getCanvas,
-  toggleShowPixels,
-  adjustBlur,
-  adjustWipe,
-  rerender,
-} = setupRenderer()
-
 function nextRealOccurrence(time: Time): StandardTime {
   if (time.hour === "*") {
     const currentHour = new Date().getHours()
@@ -241,7 +220,7 @@ function timeDisplay(time: StandardTime): string {
   return `${time.hour}:${String(time.min).padStart(2, "0")}`
 }
 
-const NBSP = " "
+const NBSP = "\u00A0"
 
 function regenerateList() {
   const charWidth = widthToChars(window.innerWidth)
@@ -262,6 +241,12 @@ function regenerateList() {
 
   const elems = sortedInstances
     .map(({ entry, time }, index) => {
+      const p = document.createElement("p")
+      const a = document.createElement("a")
+      a.href = entry.url
+      a.target = "_blank"
+      a.textContent = entry.name
+
       const minutesLeft = minutesUntilTime(time)
       const remainingLabel = generateTimeLabel(minutesLeft)
 
@@ -269,24 +254,37 @@ function regenerateList() {
         document.title = "Next in: " + remainingLabel
       }
 
-      // const timeLabel = timeDisplay(time)
+      const timeLabel = timeDisplay(time)
 
       const remaining = charWidth - entry.name.length
-      return entry.name + remainingLabel.padStart(remaining, NBSP)
+
+      const wrapperSpan = document.createElement("span")
+      wrapperSpan.classList.add("switch-wrapper")
+
+      const timeUntil = document.createElement("span")
+      timeUntil.textContent = remainingLabel.padStart(remaining, NBSP)
+
+      const timeAt = document.createElement("span")
+      timeAt.textContent = timeLabel.padStart(remaining, NBSP)
+
+      wrapperSpan.append(timeUntil, timeAt)
+
+      p.append(a, wrapperSpan)
+
+      return p
     })
     .slice(0, 7)
 
   const currentTime = currentTimeDisplay()
 
-  const shiftedTime = NBSP.repeat(charWidth - currentTime.length) + currentTime
+  const timeElem = document.createElement("p")
+  timeElem.textContent =
+    "\u00A0".repeat(charWidth - currentTime.length) + currentTime
 
-  elems.unshift(shiftedTime)
+  elems.unshift(timeElem)
 
-  console.log(elems)
-
-  renderRows(elems, updateTexture, renderConfig)
-  // const container = document.getElementById("container")!
-  // container.replaceChildren(...elems)
+  const container = document.getElementById("container")!
+  container.replaceChildren(...elems)
 }
 
 function secondBasedTimer(callback: () => void) {
@@ -299,10 +297,6 @@ window.addEventListener("resize", regenerateList)
 regenerateList()
 secondBasedTimer(regenerateList)
 
-document.body.addEventListener("keydown", (e) => {})
-
-document.getElementById("shader-container")!.append(getCanvas())
-
 document.body.addEventListener("keypress", (e) => {
   if (e.key === "f") {
     if (document.fullscreenElement !== null) {
@@ -310,12 +304,5 @@ document.body.addEventListener("keypress", (e) => {
     } else {
       document.body.requestFullscreen()
     }
-  } else if (e.key === "r") {
-    renderConfig.rainbow = !renderConfig.rainbow
-    rerender()
-  } else if (e.key === "p") toggleShowPixels()
-  else if (e.key === "=") adjustBlur(1)
-  else if (e.key === "-") adjustBlur(-1)
-  else if (e.key === ",") adjustWipe(-1)
-  else if (e.key === ".") adjustWipe(1)
+  }
 })
