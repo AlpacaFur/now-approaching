@@ -47,6 +47,20 @@ export const DATA: Entry[] = [
     ],
   },
   {
+    name: "Make a Wiish",
+    url: "http://wiish.bramdj.dev",
+    times: [
+      {
+        hour: 11,
+        min: 11,
+      },
+      {
+        hour: 23,
+        min: 11,
+      },
+    ],
+  },
+  {
     name: "SSH a Fissh",
     url: "https://fissh.breq.dev",
     times: [

@@ -16,12 +16,15 @@ if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
   document.body.classList.remove("fadein")
 }
 
+const RENDERING_OPTIONS = ["normal", "uv", "festive", "rainbow"] as const
 export interface RenderConfig {
+  rendering: (typeof RENDERING_OPTIONS)[number]
   rainbow: boolean
   filled: boolean
 }
 
 const renderConfig: RenderConfig = {
+  rendering: "normal",
   rainbow: false,
   filled: false,
 }
@@ -32,11 +35,13 @@ const {
   toggleShowPixels,
   adjustBlur,
   adjustWipe,
+  updatePitch,
   rerender,
 } = setupRenderer()
 
 function regenerateList() {
-  const charWidth = widthToChars(window.innerWidth)
+  const { chars: charsThatFit, pitch } = widthToChars(window.innerWidth)
+  updatePitch(pitch)
 
   const sortedInstances = DATA.map((entry) => {
     return entry.times
@@ -61,22 +66,19 @@ function regenerateList() {
 
       // const timeLabel = timeDisplay(time)
 
-      const remaining = charWidth - entry.name.length
+      const remaining = charsThatFit - entry.name.length
       return entry.name + remainingLabel.padStart(remaining, NBSP)
     })
-    .slice(0, 7)
+    .slice(0, 8)
 
   const currentTime = currentTimeDisplay()
 
-  const shiftedTime = NBSP.repeat(charWidth - currentTime.length) + currentTime
+  const shiftedTime =
+    NBSP.repeat(charsThatFit - currentTime.length) + currentTime
 
   elems.unshift(shiftedTime)
 
-  console.log(elems)
-
   renderRows(elems, updateTexture, renderConfig)
-  // const container = document.getElementById("container")!
-  // container.replaceChildren(...elems)
 }
 
 window.addEventListener("resize", regenerateList)
@@ -95,11 +97,19 @@ document.body.addEventListener("keypress", (e) => {
       document.body.requestFullscreen()
     }
   } else if (e.key === "r") {
-    renderConfig.rainbow = !renderConfig.rainbow
+    const currentIndex = RENDERING_OPTIONS.indexOf(renderConfig.rendering)
+    const newRendering =
+      RENDERING_OPTIONS[(currentIndex + 1) % RENDERING_OPTIONS.length]
+    renderConfig.rendering = newRendering
     rerender()
   } else if (e.key === "p") toggleShowPixels()
   else if (e.key === "=") adjustBlur(1)
   else if (e.key === "-") adjustBlur(-1)
-  else if (e.key === ",") adjustWipe(-1)
-  else if (e.key === ".") adjustWipe(1)
+  else if (e.key === ",") {
+    updatePitch(-1)
+    regenerateList()
+  } else if (e.key === ".") {
+    updatePitch(1)
+    regenerateList()
+  }
 })

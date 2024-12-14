@@ -15,11 +15,13 @@ import { FRAGMENT_SHADER } from "./fragment"
 import { VERTEX_SHADER } from "./vertex"
 import { animationStep } from "../animation"
 
-const SKEW = 5.00001 * devicePixelRatio
-const RADIUS = SKEW * 0.4
+const RENDER_RES = Math.max(2.0, devicePixelRatio)
+
+const PITCH = 5.00001 * RENDER_RES
+const RADIUS = PITCH * 0.4
+const BLUR_DISTANCE = PITCH * 1.0
+const SECOND_BLUR_DISTANCE = PITCH * 2.4
 const BRIGHTEN = 1.5
-const BLUR_DISTANCE = SKEW * 1.0
-const SECOND_BLUR_DISTANCE = SKEW * 2.4
 
 export type Updater = (
   data: Uint8ClampedArray,
@@ -27,17 +29,17 @@ export type Updater = (
   height: number
 ) => void
 
-function roundedRendererDims(skew: number): [number, number] {
+function roundedRendererDims(pitch: number): [number, number] {
   return [
-    Math.floor(Math.ceil(window.innerWidth / skew) * skew),
-    Math.floor(Math.ceil(window.innerHeight / skew) * skew),
+    Math.floor(Math.ceil(window.innerWidth / pitch) * pitch),
+    Math.floor(Math.ceil(window.innerHeight / pitch) * pitch),
   ]
 }
 
 export function setupRenderer() {
   const renderer = new WebGLRenderer()
-  renderer.setPixelRatio(window.devicePixelRatio)
-  renderer.setSize(...roundedRendererDims(SKEW))
+  renderer.setPixelRatio(RENDER_RES)
+  renderer.setSize(...roundedRendererDims(PITCH))
 
   let lastUpdater: Updater = () => undefined
 
@@ -49,29 +51,29 @@ export function setupRenderer() {
   var geometry = new PlaneGeometry(2, 2)
 
   let { data, texture } = createDataTexturePair(
-    Math.ceil(window.innerWidth / SKEW),
-    Math.ceil(window.innerHeight / SKEW)
+    Math.ceil(window.innerWidth / PITCH),
+    Math.ceil(window.innerHeight / PITCH)
   )
 
   const uniforms: NonNullable<
     NonNullable<ConstructorParameters<typeof ShaderMaterial>[0]>["uniforms"]
   > = {
     u_output_resolution: {
-      value: new Vector2(...roundedRendererDims(SKEW)).multiplyScalar(
-        window.devicePixelRatio
+      value: new Vector2(...roundedRendererDims(PITCH)).multiplyScalar(
+        RENDER_RES
       ),
     },
     u_texture_resolution: {
       value: new Vector2(
         texture.image.width,
         texture.image.height
-      ).multiplyScalar(window.devicePixelRatio),
+      ).multiplyScalar(RENDER_RES),
     },
     u_texture: {
       value: texture,
     },
-    SKEW: {
-      value: SKEW,
+    PITCH: {
+      value: PITCH,
     },
     RADIUS: {
       value: RADIUS,
@@ -84,9 +86,6 @@ export function setupRenderer() {
     },
     SECOND_BLUR_DISTANCE: {
       value: SECOND_BLUR_DISTANCE,
-    },
-    SHOW_PIXELS: {
-      value: false,
     },
     WIPE_POSITION: {
       value: 0.0,
@@ -122,11 +121,11 @@ export function setupRenderer() {
    * Updates the renderer size and the uniforms when the window is resized
    */
   function onWindowResize() {
-    renderer.setSize(...roundedRendererDims(SKEW))
+    renderer.setSize(...roundedRendererDims(uniforms.PITCH.value))
 
     const { data: newData, texture: newTexture } = createDataTexturePair(
-      Math.ceil(window.innerWidth / SKEW),
-      Math.ceil(window.innerHeight / SKEW)
+      Math.ceil(window.innerWidth / uniforms.PITCH.value),
+      Math.ceil(window.innerHeight / uniforms.PITCH.value)
     )
     let oldTexture = texture
     data = newData
@@ -138,15 +137,15 @@ export function setupRenderer() {
     )
 
     uniforms.u_output_resolution.value
-      .set(...roundedRendererDims(SKEW))
-      .multiplyScalar(window.devicePixelRatio)
+      .set(...roundedRendererDims(uniforms.PITCH.value))
+      .multiplyScalar(RENDER_RES)
     updateTexture(lastUpdater)
     oldTexture.dispose()
   }
 
   function createDataTexturePair(width: number, height: number) {
-    width *= devicePixelRatio
-    height *= devicePixelRatio
+    width *= RENDER_RES
+    height *= RENDER_RES
     const data = new Uint8ClampedArray(width * height * 4)
     const texture = createTexture(data, width, height)
     return { data, texture }
@@ -217,6 +216,28 @@ export function setupRenderer() {
     render()
   }
 
+  function adjustPitch(dir: 1 | -1) {
+    let pitch = Math.floor(uniforms.PITCH.value + dir * 1)
+    pitch += 0.00001
+    pitch *= RENDER_RES
+    uniforms.PITCH.value = pitch
+    uniforms.RADIUS.value = pitch * 0.4
+    uniforms.BLUR_DISTANCE.value = pitch * 1.0
+    uniforms.SECOND_BLUR_DISTANCE.value = pitch * 2.4
+    onWindowResize()
+  }
+
+  function updatePitch(pitch: number) {
+    if (uniforms.PITCH.value === pitch) return
+    pitch += 0.00001
+    pitch *= RENDER_RES
+    uniforms.PITCH.value = pitch
+    uniforms.RADIUS.value = pitch * 0.4
+    uniforms.BLUR_DISTANCE.value = pitch * 1.0
+    uniforms.SECOND_BLUR_DISTANCE.value = pitch * 2.4
+    onWindowResize()
+  }
+
   return {
     render,
     rerender,
@@ -225,5 +246,6 @@ export function setupRenderer() {
     toggleShowPixels,
     adjustBlur,
     adjustWipe,
+    updatePitch,
   }
 }

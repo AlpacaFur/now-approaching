@@ -1,12 +1,11 @@
 export const FRAGMENT_SHADER = `
 uniform sampler2D u_texture;
 uniform vec2 u_output_resolution;
-uniform float SKEW;
+uniform float PITCH;
 uniform float RADIUS;
 uniform float BRIGHTEN;
 uniform float BLUR_DISTANCE;
 uniform float SECOND_BLUR_DISTANCE;
-uniform bool SHOW_PIXELS;
 uniform float WIPE_POSITION;
 
 varying vec2 v_uv;
@@ -57,15 +56,15 @@ vec4 addAlphaColorsReal(vec4 top, vec4 bottom) {
 }
 
 vec4 colorContributionFromAllNeighbors(vec2 cellCenter, vec2 coord) {
-    vec4 topLeft = blurContributionFromCell(cellCenter + vec2(-SKEW, -SKEW), coord);
-    vec4 topCenter = blurContributionFromCell(cellCenter + vec2(0.0, -SKEW), coord);
-    vec4 topRight = blurContributionFromCell(cellCenter + vec2(SKEW, -SKEW), coord);
-    vec4 centerLeft = blurContributionFromCell(cellCenter + vec2(-SKEW, 0.0), coord);
+    vec4 topLeft = blurContributionFromCell(cellCenter + vec2(-PITCH, -PITCH), coord);
+    vec4 topCenter = blurContributionFromCell(cellCenter + vec2(0.0, -PITCH), coord);
+    vec4 topRight = blurContributionFromCell(cellCenter + vec2(PITCH, -PITCH), coord);
+    vec4 centerLeft = blurContributionFromCell(cellCenter + vec2(-PITCH, 0.0), coord);
     vec4 trueCenter = blurContributionFromCell(cellCenter + vec2(0.0, 0.0), coord);
-    vec4 centerRight = blurContributionFromCell(cellCenter + vec2(SKEW, 0.0), coord);
-    vec4 bottomLeft = blurContributionFromCell(cellCenter + vec2(-SKEW, SKEW), coord);
-    vec4 bottomCenter = blurContributionFromCell(cellCenter + vec2(0.0, SKEW), coord);
-    vec4 bottomRight = blurContributionFromCell(cellCenter + vec2(SKEW, SKEW), coord);
+    vec4 centerRight = blurContributionFromCell(cellCenter + vec2(PITCH, 0.0), coord);
+    vec4 bottomLeft = blurContributionFromCell(cellCenter + vec2(-PITCH, PITCH), coord);
+    vec4 bottomCenter = blurContributionFromCell(cellCenter + vec2(0.0, PITCH), coord);
+    vec4 bottomRight = blurContributionFromCell(cellCenter + vec2(PITCH, PITCH), coord);
     
     vec3 sum = (topLeft.rgb * topLeft.a) + (topCenter.rgb * topCenter.a) + (topRight.rgb * topRight.a) + (centerLeft.rgb * centerLeft.a) + (trueCenter.rgb * trueCenter.a) + (centerRight.rgb * centerRight.a) + (bottomLeft.rgb * bottomLeft.a) + (bottomCenter.rgb * bottomCenter.a) + (bottomRight.rgb * bottomRight.a);
     float alphaSum = topLeft.a + topCenter.a + topRight.a + centerLeft.a + trueCenter.a + centerRight.a + bottomLeft.a + bottomCenter.a + bottomRight.a;
@@ -77,19 +76,33 @@ vec4 addAlphaColors(vec4 top, vec4 bottom) {
     return vec4(colors, clamp(top.a + bottom.a, 0.0, 1.0));
 }
 
+
+float wiggle(float value) {
+    return max(0.0, value + (sin(value) * 50.0));
+}
+
+bool withinWipe(vec2 coord) {
+    float canvasHyp = distance(vec2(0.0, 0.0), u_output_resolution);
+    vec2 center = u_output_resolution / 2.0;
+    float radiusToFullyCoverCanvas = canvasHyp / 2.0;
+    vec2 adjustedVector = coord - center;
+    float angle = degrees(atan(adjustedVector.x/adjustedVector.y));
+    float wave = sin(radians(angle * 10.0)) - 1.0;
+    float bump = (wave * WIPE_POSITION * radiusToFullyCoverCanvas * 0.1);
+    float dist = distance(center, coord);
+    return (dist + bump) < WIPE_POSITION * radiusToFullyCoverCanvas;
+}
+
 void main()
 {
     vec2 uv = v_uv;
-    vec2 fragCoord = vec2(u_output_resolution.x*uv.x, u_output_resolution.y*uv.y);
-    vec2 coord = fragCoord;
+    vec2 coord = vec2(u_output_resolution.x*uv.x, u_output_resolution.y*uv.y);
 
-    vec2 cellTopLeft = vec2(floor(coord.x / SKEW) * SKEW, floor(coord.y / SKEW) * SKEW);
-    vec2 cellCenter = cellTopLeft + SKEW/2.0;
+    vec2 cellTopLeft = vec2(floor(coord.x / PITCH) * PITCH, floor(coord.y / PITCH) * PITCH);
+    vec2 cellCenter = cellTopLeft + PITCH/2.0;
     vec4 tex = texture(u_texture, cellCenter/u_output_resolution);
-    float ratio = u_output_resolution.x/u_output_resolution.y;
-    float maxRatio = max(u_output_resolution.x, u_output_resolution.y)/min(u_output_resolution.x, u_output_resolution.y);
-    float canvasHyp = distance(vec2(0.0, 0.0), u_output_resolution)/max(u_output_resolution.x, u_output_resolution.y);
-    if (SHOW_PIXELS || distance(vec2(0.5, 0.5/ratio), vec2(uv.x, (1.0-uv.y)/ratio)) < WIPE_POSITION * canvasHyp / 2.0) {
+
+    if (withinWipe(coord)) {
         gl_FragColor = vec4(tex.rgb, 1.0);
         return;
     }

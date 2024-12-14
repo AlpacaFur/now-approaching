@@ -1,3 +1,4 @@
+import { LETTER_WIDTH_WITH_GAP } from "./shader/texture-drawing"
 import { StandardTime } from "./time"
 
 export const NBSP = " "
@@ -23,13 +24,15 @@ export function generateTimeLabel(minutes: number) {
   return `${hours}h ${mins}m`
 }
 
-export function widthToChars(width: number): number {
+export function widthToChars(width: number): { chars: number; pitch: number } {
   const breakPoints = [
-    [0, 24],
-    [600, 40],
-    [800, 56],
-    [1000, 70],
-    [Infinity, 80],
+    [0, 1],
+    [350, 1.1],
+    [460, 1.5],
+    [650, 2.1],
+    [850, 3],
+    [1050, 4],
+    [Infinity, 5],
   ]
 
   const breakPointIndex = breakPoints.findIndex(([minWidth]) => {
@@ -37,12 +40,12 @@ export function widthToChars(width: number): number {
     else return false
   })
 
-  const fontSize = breakPoints[breakPointIndex - 1][1]
+  const pitch = breakPoints[breakPointIndex][1]
 
-  const pixelsPerChar = fontSize / 1.5
+  const pixelsPerChar = pitch * LETTER_WIDTH_WITH_GAP
   const charsThatFit = Math.floor((width - 40) / pixelsPerChar)
 
-  return Math.min(charsThatFit, 24)
+  return { chars: Math.min(charsThatFit, 24), pitch }
 }
 
 export function currentTimeDisplay(): string {
