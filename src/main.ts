@@ -1,6 +1,6 @@
-import "./shader/shader.css"
+import "./main.css"
 import { renderRows, TextBlock } from "./shader/texture-drawing"
-import { setupRenderer } from "./shader/shader"
+import { localStorageSync, setupRenderer } from "./shader/shader"
 import { DATA } from "./data"
 import { minutesUntilTime, nextRealOccurrence } from "./time"
 import {
@@ -24,8 +24,12 @@ export interface RenderConfig {
   filled: boolean
 }
 
+const [RENDERING_MODE, setRenderingMode] = localStorageSync<
+  RenderConfig["rendering"]
+>("rendering-mode", "normal")
+
 const renderConfig: RenderConfig = {
-  rendering: "normal",
+  rendering: RENDERING_MODE,
   rainbow: false,
   filled: false,
 }
@@ -37,10 +41,11 @@ const {
   adjustBlur,
   updatePitch,
   rerender,
+  getWidthHeight,
 } = setupRenderer()
 
 function regenerateList() {
-  const { chars: charsThatFit, pitch } = widthToChars(window.innerWidth)
+  const { chars: charsThatFit, pitch } = widthToChars(...getWidthHeight())
   updatePitch(pitch)
 
   const sortedInstances = DATA.map((entry) => {
@@ -80,6 +85,9 @@ function regenerateList() {
           content: remainingLabel,
           hoverable: true,
           hoverContent: timeLabel,
+          onClick: () => {
+            window.location.hash = entry.slug
+          },
           active,
         },
       ]
@@ -115,13 +123,8 @@ document.body.addEventListener("keypress", (e) => {
     } else {
       document.body.requestFullscreen()
     }
-  } else if (e.key === "r") {
-    const currentIndex = RENDERING_OPTIONS.indexOf(renderConfig.rendering)
-    const newRendering =
-      RENDERING_OPTIONS[(currentIndex + 1) % RENDERING_OPTIONS.length]
-    renderConfig.rendering = newRendering
-    rerender()
-  } else if (e.key === "p") toggleShowPixels()
+  } else if (e.key === "r") rotateRendering()
+  else if (e.key === "p") toggleShowPixels()
   else if (e.key === "=") adjustBlur(1)
   else if (e.key === "-") adjustBlur(-1)
   else if (e.key === ",") {
@@ -131,4 +134,20 @@ document.body.addEventListener("keypress", (e) => {
     updatePitch(1)
     regenerateList()
   }
+})
+
+function rotateRendering() {
+  const currentIndex = RENDERING_OPTIONS.indexOf(renderConfig.rendering)
+  const newRendering =
+    RENDERING_OPTIONS[(currentIndex + 1) % RENDERING_OPTIONS.length]
+  setRenderingMode(newRendering)
+  renderConfig.rendering = newRendering
+  rerender()
+}
+
+document.getElementById("p-key")!.addEventListener("click", () => {
+  toggleShowPixels()
+})
+document.getElementById("r-key")!.addEventListener("click", () => {
+  rotateRendering()
 })

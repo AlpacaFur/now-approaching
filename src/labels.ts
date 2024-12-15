@@ -24,23 +24,26 @@ export function generateTimeLabel(minutes: number) {
   return `${hours}h ${mins}m`
 }
 
-export function widthToChars(width: number): { chars: number; pitch: number } {
+export function widthToChars(
+  width: number,
+  height: number
+): { chars: number; pitch: number } {
   const breakPoints = [
-    [0, 1],
-    [350, 1.1],
-    [460, 1.5],
-    [650, 2.1],
-    [850, 3],
-    [1050, 4],
-    [Infinity, 5],
+    [0, 0, 1],
+    [350, 280, 1.1],
+    [460, 370, 1.5],
+    [650, 530, 2.1],
+    [850, 680, 3],
+    [1050, 840, 4],
+    [Infinity, Infinity, 5],
   ]
 
-  const breakPointIndex = breakPoints.findIndex(([minWidth]) => {
-    if (width < minWidth) return true
+  const breakPointIndex = breakPoints.findIndex(([minWidth, minHeight]) => {
+    if (width < minWidth || height < minHeight) return true
     else return false
   })
 
-  const pitch = breakPoints[breakPointIndex][1]
+  const pitch = breakPoints[breakPointIndex][2]
 
   const pixelsPerChar = pitch * LETTER_WIDTH_WITH_GAP
   const charsThatFit = Math.floor((width - 40) / pixelsPerChar)

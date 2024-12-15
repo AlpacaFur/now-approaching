@@ -1,0 +1,94 @@
+body {
+  overflow-x: hidden;
+  background: black;
+  margin: 0px;
+}
+
+#shader-container {
+  height: 100svh;
+  overflow: hidden;
+}
+
+.credits {
+  color: white;
+  padding: 20px 40px;
+  font-family: monospace;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50px;
+  justify-content: center;
+}
+
+.credits > div {
+  flex: 1;
+  min-width: 300px;
+  max-width: 575px;
+}
+
+.credits-half > div {
+  max-width: 600px;
+}
+
+.credits h1 {
+  color: rgb(207, 107, 0);
+}
+
+.credits a,
+.credits a:visited {
+  color: rgb(207, 107, 0);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.credits a:not([href]) {
+  color: magenta;
+}
+
+.credits a:not([href]):hover {
+  text-decoration: none;
+}
+
+.credits a:hover {
+  text-decoration: underline;
+}
+
+.credit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  outline: 1px solid #444;
+}
+
+.credit:target {
+  outline: 1px solid orange;
+}
+
+.credit p {
+  margin: 0;
+}
+
+.site-credits {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 50px;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.credits-bar {
+  height: 40px;
+  background: linear-gradient(#050505, #111, #050505, #050505);
+}
+
+key {
+  background: #333;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-weight: bold;
+  user-select: none;
+  cursor: pointer;
+}

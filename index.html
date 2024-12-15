@@ -5,19 +5,93 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/approaching.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
   <title>Now Approaching...</title>
 </head>
 
 <body class="fadein">
   <div id="shader-container"></div>
+  <div class="credits-bar"></div>
   <div class="credits">
-    <p>Testing</p>
-    <p>Testing</p>
-    <p>Testing</p>
-    <p>Testing</p>
-    <p>Testing</p>
-    <p>Testing</p>
-    <p>Testing</p>
+    <div class="credits-start">
+      <h1>Credits</h1>
+      <p>Made with &lt;3 by <a href="https://lukefelixtaylor.com">Luke</a>.</p>
+      <h2>Bitmap Font</h2>
+      <p>This is using <b>Daktronics Full Width 9x15</b>, the same font used on MBTA Orange Line train boards. Thanks
+        to
+        <a href="https://fontstruct.com/fontstructors/1466679/bentheminer">BenTheMiner</a> for help in sourcing the
+        font!
+      </p>
+      <h2>Thanks</h2>
+      <p>Thanks to <a href="https://breq.dev">Brooke</a> for the directory idea. You can find <a
+          href="https://directory.breq.dev">Brooke's version of the directory here</a>.</p>
+      <p>Thanks to everyone who has made a time based site like these, whether listed here or not! It's a really fun
+        community effort to be a part of.</p>
+      <h2>Technology</h2>
+      <p>Built using <a href="https://threejs.org/">Three.js, <a
+            href="https://www.khronos.org/opengl/wiki/Core_Language_(GLSL)">GLSL</a>, <a
+            href="https://www.typescriptlang.org/">TypeScript</a>, and
+          <a href="https://vite.dev/">Vite</a>. Rendering
+          experimentation
+          started on ShaderToy.</p>
+      <h2>Keyboard Shortcuts</h2>
+      <p>
+        <key id="p-key">p</key> - Display underlying pixel bitmap
+      </p>
+      <p>
+        <key id="r-key">r</key> - Toggle between render styles
+      </p>
+    </div>
+    <div class="credits-continued">
+      <h2>Listed Sites</h2>
+      <div class="site-credits" id="site-credits">
+        <div class="credit" id="make-a-sequence">
+          <p><a href="https://sequence.breq.dev">Make a Sequence</a><span> (0:34, 12:34)</span> - See a random OEIS
+            integer sequence!</p>
+          <p>by <a href="https://breq.dev">Brooke</a></p>
+        </div>
+        <div class="credit" id="make-a-byte">
+          <p><a href="https://makeabyte.lftq.in">Make a Byte</a><span> (2:55, 14:55)</span> - See a random byte value
+            with different interpretations including ASCII, binary, and 6502 opcode.</p>
+          <p>by <a href="https://lukefelixtaylor.com">Luke</a>, <a href="https://breq.dev">Brooke</a></p>
+        </div>
+        <div class="credit" id="dial-a-fish">
+          <p><a href="https://queercomputerclub.ca/projects/quecey-voip/">Dial a Fish</a><span> (*:11)</span> - Fish
+            image via SSTV over a phone call!</p>
+          <p>by <a href="https://adryd.com/">Ari</a>, <a href="https://suricrasia.online/">Blackle</a></p>
+        </div>
+        <div class="credit" id="spin-a-fish">
+          <p><a href="https://fish.lftq.in">Spin a Fish</a><span> (11:11, 23:11)</span> - A random, spinnable,
+            Minecraft-style 3D fish.</p>
+          <p>by <a href="https://lukefelixtaylor.com">Luke</a></p>
+        </div>
+        <div class="credit" id="make-a-fish">
+          <p><a href="http://makea.fish">Make a Fish</a><span> (11:11, 23:11)</span> - The original site that sparked
+            it all! Makes a random patterned fish. HTTP only.</p>
+          <p>by <a href="https://weepingwitch.github.io/">Willow</a></p>
+        </div>
+        <div class="credit" id="make-a-wiish">
+          <p><a href="https://wiish.bramdj.dev">Make a Wiish</a><span> (11:11, 23:11)</span> - Catch a random fish
+            from Wii Play Fishing!</p>
+          <p>by <a href="https://bramdj.dev">Bram</a></p>
+        </div>
+        <div class="credit" id="ssh-a-fissh">
+          <p><a href="https://fissh.breq.dev">SSH a Fissh</a><span> (11:11, 23:11)</span> - Get an ASCII art fish via
+            an SSH connection!</p>
+          <p>by <a href="https://breq.dev">Brooke</a>, <a href="https://avasilver.dev/">Ava</a></p>
+        </div>
+        <div class="credit" id="x1111-a-fish">
+          <p><a href="https://miakizz.quest/xfish">X11:11 Make a Fish</a><span> (11:11, 23:11)</span> - Connect your
+            X11 server and see a drawn fish image!</p>
+          <p>by <a href="https://miakizz.quest/">Mia</a></p>
+        </div>
+        <div class="credit" id="bake-a-dish">
+          <p><a href="https://tris.fyi/dish/">Bake a Dish</a><span> (22:22)</span> - See a random baked dish recipe!
+          </p>
+          <p>by <a href="https://tris.fyi/">Tris</a></p>
+        </div>
+      </div>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

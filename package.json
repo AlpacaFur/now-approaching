@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@types/three": "^0.170.0",
-    "context-filter-polyfill": "^0.3.21",
     "three": "^0.171.0"
   }
 }

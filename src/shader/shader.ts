@@ -31,11 +31,22 @@ export type Updater = (
   hitIndex: number | false
 ) => ClickBox[] | undefined
 
-function roundedRendererDims(pitch: number): [number, number] {
-  return [
-    Math.floor(Math.ceil(window.innerWidth / pitch) * pitch),
-    Math.floor(Math.ceil(window.innerHeight / pitch) * pitch),
-  ]
+export function localStorageSync<T extends {}>(
+  key: string,
+  defaultValue: T
+): [T, (value: T) => void] {
+  const currentValue = localStorage.getItem(key)
+
+  const setLocalStorage = (value: T) => {
+    localStorage.setItem(key, JSON.stringify(value))
+  }
+
+  if (currentValue !== null) {
+    return [JSON.parse(currentValue), setLocalStorage]
+  } else {
+    setLocalStorage(defaultValue)
+    return [defaultValue, setLocalStorage]
+  }
 }
 
 export function setupRenderer() {
@@ -44,7 +55,12 @@ export function setupRenderer() {
 
   let lastUpdater: Updater = () => undefined
 
-  let wipeDirection = -1
+  const [STARTING_WIPE_POSITION, setStartingWipePosition] = localStorageSync(
+    "starting-wipe-position",
+    0.0
+  )
+
+  let wipeDirection = STARTING_WIPE_POSITION === 0.0 ? -1 : 1
 
   const renderer = new WebGLRenderer()
   renderer.setPixelRatio(RENDER_RES)
@@ -71,9 +87,11 @@ export function setupRenderer() {
 
   var geometry = new PlaneGeometry(2, 2)
 
+  const [screenWidth, screenHeight] = getWidthHeight()
+
   let { data, texture } = createDataTexturePair(
-    Math.ceil(window.innerWidth / PITCH),
-    Math.ceil(window.innerHeight / PITCH)
+    Math.ceil(screenWidth / PITCH),
+    Math.ceil(screenHeight / PITCH)
   )
 
   const uniforms: NonNullable<
@@ -109,7 +127,7 @@ export function setupRenderer() {
       value: SECOND_BLUR_DISTANCE,
     },
     WIPE_POSITION: {
-      value: 0.0,
+      value: STARTING_WIPE_POSITION,
     },
   }
 
@@ -138,15 +156,35 @@ export function setupRenderer() {
     renderer.render(scene, camera)
   }
 
+  function getWidthHeight(): [number, number] {
+    const parent = renderer.domElement.parentElement
+    if (parent !== null) {
+      const boundingBox = parent.getBoundingClientRect()
+      return [boundingBox.width, boundingBox.height]
+    } else {
+      return [window.innerWidth, window.innerHeight]
+    }
+  }
+
+  function roundedRendererDims(pitch: number): [number, number] {
+    const [screenWidth, screenHeight] = getWidthHeight()
+    return [
+      Math.floor(Math.ceil(screenWidth / pitch) * pitch),
+      Math.floor(Math.ceil(screenHeight / pitch) * pitch),
+    ]
+  }
+
   /*
    * Updates the renderer size and the uniforms when the window is resized
    */
   function onWindowResize() {
     renderer.setSize(...roundedRendererDims(uniforms.PITCH.value))
 
+    const [screenWidth, screenHeight] = getWidthHeight()
+
     const { data: newData, texture: newTexture } = createDataTexturePair(
-      Math.ceil(window.innerWidth / uniforms.PITCH.value),
-      Math.ceil(window.innerHeight / uniforms.PITCH.value)
+      Math.ceil(screenWidth / uniforms.PITCH.value),
+      Math.ceil(screenHeight / uniforms.PITCH.value)
     )
     let oldTexture = texture
     data = newData
@@ -214,10 +252,12 @@ export function setupRenderer() {
   }
 
   function animateWipe() {
+    const targetPosition = wipeDirection === 1 ? 1 : 0
+    setStartingWipePosition(targetPosition)
     requestAnimationFrame(
       animationStep(
         uniforms.WIPE_POSITION.value,
-        wipeDirection === 1 ? 1 : 0,
+        targetPosition,
         500,
         null,
         (value) => {
@@ -296,5 +336,6 @@ export function setupRenderer() {
     adjustBlur,
     adjustWipe,
     updatePitch,
+    getWidthHeight,
   }
 }

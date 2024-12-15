@@ -1,0 +1,60 @@
+body {
+  background: black;
+  color: white;
+  font-family: monospace;
+}
+
+a,
+a:visited {
+  color: dodgerblue;
+  font-weight: bold;
+}
+
+.credits h1 {
+  color: rgb(207, 107, 0);
+}
+
+.credits a,
+.credits a:visited {
+  color: rgb(207, 107, 0);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.credits a:not([href]) {
+  color: magenta;
+}
+
+.credits a:not([href]):hover {
+  text-decoration: none;
+}
+
+.credits a:hover {
+  text-decoration: underline;
+}
+
+.credit p {
+  margin: 0;
+}
+
+.credit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  outline: 1px solid #444;
+}
+
+.site-credits {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 50px;
+}
+
+pre {
+  white-space: pre-wrap;
+  border: 1px solid white;
+  padding: 20px;
+  margin-bottom: 100px;
+}

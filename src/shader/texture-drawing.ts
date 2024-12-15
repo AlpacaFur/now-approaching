@@ -1,4 +1,3 @@
-import "./shader.css"
 import { CHAR, FONT } from "../font/font"
 import { base64ToBinary } from "../font/helpers"
 import { Updater } from "./shader"
