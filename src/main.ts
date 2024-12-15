@@ -1,5 +1,5 @@
 import "./shader/shader.css"
-import { renderRows } from "./shader/texture-drawing"
+import { renderRows, TextBlock } from "./shader/texture-drawing"
 import { setupRenderer } from "./shader/shader"
 import { DATA } from "./data"
 import { minutesUntilTime, nextRealOccurrence } from "./time"
@@ -7,6 +7,7 @@ import {
   currentTimeDisplay,
   generateTimeLabel,
   NBSP,
+  timeDisplay,
   widthToChars,
 } from "./labels"
 import { secondBasedTimer } from "./animation"
@@ -34,7 +35,6 @@ const {
   getCanvas,
   toggleShowPixels,
   adjustBlur,
-  adjustWipe,
   updatePitch,
   rerender,
 } = setupRenderer()
@@ -55,37 +55,56 @@ function regenerateList() {
     return minutesUntilTime(timeA) - minutesUntilTime(timeB)
   })
 
-  const elems = sortedInstances
-    .map(({ entry, time }, index) => {
+  const elems: TextBlock[][] = sortedInstances
+    .map(({ entry, time }, index): TextBlock[] => {
       const minutesLeft = minutesUntilTime(time)
-      const remainingLabel = generateTimeLabel(minutesLeft)
+      const remainingLabel = generateTimeLabel(minutesLeft).padStart(6, " ")
+      const timeLabel = timeDisplay(time).padStart(6, " ")
 
       if (index === 0) {
         document.title = "Next in: " + remainingLabel
       }
 
-      // const timeLabel = timeDisplay(time)
+      const remaining = charsThatFit - entry.name.length - remainingLabel.length
 
-      const remaining = charsThatFit - entry.name.length
-      return entry.name + remainingLabel.padStart(remaining, NBSP)
+      const active = remainingLabel.endsWith("BRD")
+      return [
+        {
+          content: entry.name,
+          hoverable: true,
+          active,
+          onClick: () => openURL(entry.url),
+        },
+        { content: " ".repeat(remaining), active },
+        {
+          content: remainingLabel,
+          hoverable: true,
+          hoverContent: timeLabel,
+          active,
+        },
+      ]
+      // return entry.name + remainingLabel.padStart(remaining, NBSP)
     })
     .slice(0, 8)
 
   const currentTime = currentTimeDisplay()
 
-  const shiftedTime =
-    NBSP.repeat(charsThatFit - currentTime.length) + currentTime
+  const timeShift = NBSP.repeat(charsThatFit - currentTime.length)
 
-  elems.unshift(shiftedTime)
+  elems.unshift([{ content: timeShift }, { content: currentTime }])
 
   renderRows(elems, updateTexture, renderConfig)
+}
+
+function openURL(url: string) {
+  window.open(url, "_blank")
 }
 
 window.addEventListener("resize", regenerateList)
 regenerateList()
 secondBasedTimer(regenerateList)
 
-document.body.addEventListener("keydown", (e) => {})
+document.body.addEventListener("keydown", () => {})
 
 document.getElementById("shader-container")!.append(getCanvas())
 

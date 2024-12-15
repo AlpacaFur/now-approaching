@@ -14,6 +14,7 @@ import {
 import { FRAGMENT_SHADER } from "./fragment"
 import { VERTEX_SHADER } from "./vertex"
 import { animationStep } from "../animation"
+import { ClickBox } from "./texture-drawing"
 
 const RENDER_RES = Math.max(2.0, devicePixelRatio)
 
@@ -26,8 +27,9 @@ const BRIGHTEN = 1.5
 export type Updater = (
   data: Uint8ClampedArray,
   width: number,
-  height: number
-) => void
+  height: number,
+  hitIndex: number | false
+) => ClickBox[] | undefined
 
 function roundedRendererDims(pitch: number): [number, number] {
   return [
@@ -37,13 +39,32 @@ function roundedRendererDims(pitch: number): [number, number] {
 }
 
 export function setupRenderer() {
-  const renderer = new WebGLRenderer()
-  renderer.setPixelRatio(RENDER_RES)
-  renderer.setSize(...roundedRendererDims(PITCH))
+  let hitZones: ClickBox[] = []
+  let activeHitZone: number | false = false
 
   let lastUpdater: Updater = () => undefined
 
   let wipeDirection = -1
+
+  const renderer = new WebGLRenderer()
+  renderer.setPixelRatio(RENDER_RES)
+  renderer.setSize(...roundedRendererDims(PITCH))
+
+  window.addEventListener("blur", () => {
+    handleMouseCollision(-1, -1)
+  })
+
+  renderer.domElement.addEventListener("click", (e) => {
+    const collision = getMouseCollision(e.pageX, e.pageY)
+    if (collision !== false) {
+      hitZones[collision]?.onClick?.()
+    }
+    console.log("clicked", getMouseCollision(e.pageX, e.pageY))
+  })
+
+  renderer.domElement.addEventListener("mousemove", (e) => {
+    handleMouseCollision(e.pageX, e.pageY)
+  })
 
   const scene = new Scene()
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
@@ -171,7 +192,9 @@ export function setupRenderer() {
 
   function updateTexture(updater: Updater) {
     clearTexture()
-    updater(data, texture.image.width, texture.image.height)
+    hitZones =
+      updater(data, texture.image.width, texture.image.height, activeHitZone) ??
+      []
     texture.needsUpdate = true
     lastUpdater = updater
     render()
@@ -216,17 +239,6 @@ export function setupRenderer() {
     render()
   }
 
-  function adjustPitch(dir: 1 | -1) {
-    let pitch = Math.floor(uniforms.PITCH.value + dir * 1)
-    pitch += 0.00001
-    pitch *= RENDER_RES
-    uniforms.PITCH.value = pitch
-    uniforms.RADIUS.value = pitch * 0.4
-    uniforms.BLUR_DISTANCE.value = pitch * 1.0
-    uniforms.SECOND_BLUR_DISTANCE.value = pitch * 2.4
-    onWindowResize()
-  }
-
   function updatePitch(pitch: number) {
     if (uniforms.PITCH.value === pitch) return
     pitch += 0.00001
@@ -236,6 +248,43 @@ export function setupRenderer() {
     uniforms.BLUR_DISTANCE.value = pitch * 1.0
     uniforms.SECOND_BLUR_DISTANCE.value = pitch * 2.4
     onWindowResize()
+  }
+
+  function getMouseCollision(origX: number, origY: number): number | false {
+    const pitch = uniforms.PITCH.value
+
+    const x = origX / (pitch / RENDER_RES)
+    const y = origY / (pitch / RENDER_RES)
+
+    const firstHit = hitZones.findIndex(
+      ({ boundingBox: zone }) =>
+        x >= zone.left &&
+        x < zone.left + zone.width &&
+        y >= zone.top &&
+        y < zone.top + zone.height
+    )
+
+    if (firstHit === -1) {
+      return false
+    } else {
+      return firstHit
+    }
+  }
+
+  function handleMouseCollision(x: number, y: number) {
+    const hit = getMouseCollision(x, y)
+
+    if (hit === activeHitZone) {
+      return
+    } else {
+      if (hit !== false && hitZones[hit].onClick !== undefined) {
+        renderer.domElement.classList.add("pointer")
+      } else {
+        renderer.domElement.classList.remove("pointer")
+      }
+      activeHitZone = hit
+      rerender()
+    }
   }
 
   return {

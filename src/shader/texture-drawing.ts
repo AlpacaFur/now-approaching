@@ -21,7 +21,7 @@ function drawLetterOntoGrid(
   y: number,
   rendering: Rendering | false = false
 ) {
-  const invert = rendering && rendering.invert === true
+  const invert = rendering && rendering.invert === true && !rendering.stroke
 
   const binary = base64ToBinary(FONT[letter], LETTER_WIDTH, LETTER_HEIGHT)
 
@@ -37,38 +37,34 @@ function drawLetterOntoGrid(
     const realX = x + localX
     const realY = height - (y + localY) - 1
 
-    drawPixelOnGrid(data, width, height, realX, realY, rendering)
+    drawPixelOnGrid(data, width, realX, realY, rendering)
   }
 
   if (invert) {
-    for (let localX = -1; localX < LETTER_WIDTH_WITH_GAP; localX += 1) {
-      const realX = x + localX
-      const realYTop = height - (y - 1) - 1
-      const realYBottom = height - (y + LETTER_HEIGHT) - 1
-      drawPixelOnGrid(data, width, height, realX, realYTop, rendering)
-      drawPixelOnGrid(data, width, height, realX, realYBottom, rendering)
-    }
-    for (let localY = -1; localY < LETTER_HEIGHT_WITH_GAP; localY += 1) {
-      const realXLeft = x - 1
-      const realXRight = x + LETTER_WIDTH
-      const realY = height - (y + localY) - 1
-      drawPixelOnGrid(data, width, height, realXLeft, realY, rendering)
-      drawPixelOnGrid(data, width, height, realXRight, realY, rendering)
-    }
+    renderStroke(
+      data,
+      width,
+      {
+        top: height - y - LETTER_HEIGHT - 1,
+        left: x - 1,
+        width: LETTER_WIDTH + 1,
+        height: LETTER_HEIGHT + 1,
+      },
+      rendering
+    )
   }
 }
 
 function drawPixelOnGrid(
   data: Uint8ClampedArray,
   width: number,
-  height: number,
   x: number,
   y: number,
   rendering: Rendering | false
 ) {
   const pixelIndex = (y * width + x) * 4
 
-  if (rendering) {
+  if (rendering && rendering.type !== "normal") {
     if (rendering.type === "uv") {
       const { left, top, width, height } = rendering.boundingBox
       const offsetX = x - left
@@ -88,15 +84,25 @@ function drawPixelOnGrid(
   }
 }
 
-interface RenderingBase {
-  invert?: boolean
-}
-
-interface BoundingBox extends RenderingBase {
+export interface BoundingBox {
   top: number
   left: number
   width: number
   height: number
+}
+
+export interface ClickBox {
+  boundingBox: BoundingBox
+  onClick?: () => void
+}
+
+interface RenderingBase {
+  invert?: boolean
+  stroke?: boolean
+}
+
+interface Normal extends RenderingBase {
+  type: "normal"
 }
 
 interface Rainbow extends RenderingBase {
@@ -109,14 +115,13 @@ interface Color extends RenderingBase {
   color: [number, number, number]
 }
 
-type Rendering = Rainbow | Color
+type Rendering = Rainbow | Color | Normal
 
 interface LetterProperties {
   xOrigin: number
   yOrigin: number
   rowsHeight: number
   rowsWidth: number
-  x: number
   y: number
 }
 
@@ -163,41 +168,148 @@ function determineRendering(
       color: CASCADE_COLORS[y] ?? [255, 255, 255],
     }
   } else {
-    return false
+    return { type: "normal" }
   }
 }
 
+function renderStroke(
+  data: Uint8ClampedArray,
+  canvasWidth: number,
+  boundingBox: BoundingBox,
+  rendering: Rendering | false
+) {
+  const { left, top, width, height } = boundingBox
+
+  for (let x = left; x < left + width + 1; x += 1) {
+    drawPixelOnGrid(data, canvasWidth, x, top, rendering)
+    drawPixelOnGrid(data, canvasWidth, x, top + height, rendering)
+  }
+  for (let y = top; y < top + height; y += 1) {
+    drawPixelOnGrid(data, canvasWidth, left, y, rendering)
+    drawPixelOnGrid(data, canvasWidth, left + width, y, rendering)
+  }
+}
+
+export interface TextBlock {
+  content: string
+  active?: boolean
+  hoverable?: boolean
+  hoverContent?: string
+  onClick?: () => void
+}
+
 export const renderRows = (
-  rows: string[],
+  rows: TextBlock[][],
   updateTexture: (updater: Updater) => void,
   renderConfig: RenderConfig
 ) => {
-  updateTexture((data, width, height) => {
+  updateTexture((data, width, height, hitIndex) => {
     const rowsHeight = rows.length * LETTER_HEIGHT_WITH_LINE - 2
     const rowsWidth =
-      Math.max(...rows.map((string) => string.length)) * LETTER_WIDTH_WITH_GAP
+      Math.max(
+        ...rows.map((row) =>
+          row.map((block) => block.content.length).reduce((a, b) => a + b)
+        )
+      ) * LETTER_WIDTH_WITH_GAP
     const xOrigin = Math.floor((width - rowsWidth) / 2)
     const yOrigin = Math.floor((height - rowsHeight) / 2)
 
-    rows.forEach((string, y) => {
-      string.split("").forEach((char, x) => {
-        drawLetterOntoGrid(
-          data,
-          width,
-          height,
-          char as CHAR,
-          xOrigin + LETTER_WIDTH_WITH_GAP * x,
-          yOrigin + LETTER_HEIGHT_WITH_LINE * y,
-          determineRendering(renderConfig.rendering, {
+    let index = 0
+    let hitZones: ClickBox[] = []
+
+    let postponedPasses: Array<() => void> = []
+
+    rows.forEach((blocks, y) => {
+      let offsetSoFar = 0
+      blocks.forEach((block) => {
+        const content =
+          index === hitIndex
+            ? block.hoverContent ?? block.content
+            : block.content
+
+        const hovering = hitIndex === index
+        content.split("").forEach((char, origX) => {
+          const x = offsetSoFar + origX
+
+          const rendering = determineRendering(renderConfig.rendering, {
             xOrigin,
             yOrigin,
             rowsHeight,
             rowsWidth,
-            x,
             y,
           })
-        )
+
+          drawLetterOntoGrid(
+            data,
+            width,
+            height,
+            char as CHAR,
+            xOrigin + LETTER_WIDTH_WITH_GAP * x,
+            yOrigin + LETTER_HEIGHT_WITH_LINE * y,
+            rendering
+              ? {
+                  ...rendering,
+                  invert:
+                    (block.active && (!block.hoverable || !hovering)) ||
+                    (!block.active && block.hoverable && hovering),
+                }
+              : false
+          )
+        })
+
+        const boundingBox = {
+          top: yOrigin + LETTER_HEIGHT_WITH_LINE * y - 1,
+          left: xOrigin + offsetSoFar * LETTER_WIDTH_WITH_GAP - 1,
+          width: LETTER_WIDTH_WITH_GAP * block.content.length + 1,
+          height: LETTER_HEIGHT_WITH_GAP + 1,
+        }
+
+        hitZones.push({
+          boundingBox,
+          onClick: block.onClick,
+        })
+
+        if (block.active && block.hoverable && hovering) {
+          const renderingBoundingBox: BoundingBox = {
+            ...boundingBox,
+            top: height - boundingBox.top - boundingBox.height,
+            height: boundingBox.height - 1,
+            width: boundingBox.width - 1,
+          }
+
+          const largerBoundingBox: BoundingBox = {
+            top: renderingBoundingBox.top - 1,
+            left: renderingBoundingBox.left - 1,
+            width: renderingBoundingBox.width + 2,
+            height: renderingBoundingBox.height + 2,
+          }
+
+          const outerStrokeRendering = determineRendering(
+            renderConfig.rendering,
+            {
+              xOrigin,
+              yOrigin,
+              rowsHeight,
+              rowsWidth,
+              y,
+            }
+          )
+
+          postponedPasses.push(() => {
+            renderStroke(data, width, renderingBoundingBox, {
+              type: "color",
+              color: [0, 0, 0],
+            })
+            renderStroke(data, width, largerBoundingBox, outerStrokeRendering)
+          })
+        }
+        offsetSoFar += content.length
+        index += 1
       })
     })
+
+    postponedPasses.forEach((pass) => pass())
+
+    return hitZones
   })
 }
