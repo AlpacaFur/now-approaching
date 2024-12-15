@@ -25,7 +25,7 @@ function initializeBackground(
   }
 }
 
-function pickRandom(array: string[], bias?: number) {
+export function pickRandom(array: string[], bias?: number) {
   if (bias !== undefined) {
     return array[Math.floor(((Math.random() + bias * 3) / 4) * array.length)]
   } else {
