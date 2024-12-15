@@ -22,16 +22,23 @@ export interface RenderConfig {
   rendering: (typeof RENDERING_OPTIONS)[number]
   rainbow: boolean
   filled: boolean
+  condenseFish: boolean
 }
 
 const [RENDERING_MODE, setRenderingMode] = localStorageSync<
   RenderConfig["rendering"]
 >("rendering-mode", "normal")
 
+const [CONDENSE_FISH, setCondenseFish] = localStorageSync(
+  "condense-fish",
+  false
+)
+
 const renderConfig: RenderConfig = {
   rendering: RENDERING_MODE,
   rainbow: false,
   filled: false,
+  condenseFish: CONDENSE_FISH,
 }
 
 const {
@@ -48,17 +55,27 @@ function regenerateList() {
   const { chars: charsThatFit, pitch } = widthToChars(...getWidthHeight())
   updatePitch(pitch)
 
-  const sortedInstances = DATA.map((entry) => {
-    return entry.times
-      .map((time) => ({ time, entry }))
-      .map((instance) => ({
-        entry: instance.entry,
-        time: nextRealOccurrence(instance.time),
-      }))
-      .sort((a, b) => minutesUntilTime(a.time) - minutesUntilTime(b.time))[0]
-  }).sort(({ time: timeA }, { time: timeB }) => {
-    return minutesUntilTime(timeA) - minutesUntilTime(timeB)
+  const filteredData = DATA.filter((entry) => {
+    if (renderConfig.condenseFish) {
+      return entry.condensible !== true
+    } else {
+      return entry.condensor !== true
+    }
   })
+
+  const sortedInstances = filteredData
+    .map((entry) => {
+      return entry.times
+        .map((time) => ({ time, entry }))
+        .map((instance) => ({
+          entry: instance.entry,
+          time: nextRealOccurrence(instance.time),
+        }))
+        .sort((a, b) => minutesUntilTime(a.time) - minutesUntilTime(b.time))[0]
+    })
+    .sort(({ time: timeA }, { time: timeB }) => {
+      return minutesUntilTime(timeA) - minutesUntilTime(timeB)
+    })
 
   const elems: TextBlock[][] = sortedInstances
     .map(({ entry, time }, index): TextBlock[] => {
@@ -125,6 +142,7 @@ document.body.addEventListener("keypress", (e) => {
     }
   } else if (e.key === "r") rotateRendering()
   else if (e.key === "p") toggleShowPixels()
+  else if (e.key === "m") toggleFishCondensor()
   else if (e.key === "=") adjustBlur(1)
   else if (e.key === "-") adjustBlur(-1)
   else if (e.key === ",") {
@@ -145,9 +163,18 @@ function rotateRendering() {
   rerender()
 }
 
+function toggleFishCondensor() {
+  renderConfig.condenseFish = !renderConfig.condenseFish
+  setCondenseFish(renderConfig.condenseFish)
+  regenerateList()
+}
+
 document.getElementById("p-key")!.addEventListener("click", () => {
   toggleShowPixels()
 })
 document.getElementById("r-key")!.addEventListener("click", () => {
   rotateRendering()
+})
+document.getElementById("m-key")!.addEventListener("click", () => {
+  toggleFishCondensor()
 })

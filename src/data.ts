@@ -10,6 +10,8 @@ interface Entry {
   description?: string
   authors?: Author[]
   longName?: string
+  condensible?: boolean
+  condensor?: boolean
   url: string
   slug: string
   times: Time[]
@@ -85,26 +87,10 @@ export const DATA: Entry[] = [
     ],
   },
   {
-    name: "Spin a Fish",
-    slug: "spin-a-fish",
-    url: "https://fish.lftq.in",
-    description: "A random, spinnable, Minecraft-style 3D fish.",
-    authors: [luke],
-    times: [
-      {
-        hour: 11,
-        min: 11,
-      },
-      {
-        hour: 23,
-        min: 11,
-      },
-    ],
-  },
-  {
     name: "Make a Fish",
     slug: "make-a-fish",
     url: "http://makea.fish",
+    condensible: true,
     description:
       "The original site that sparked it all! Makes a random patterned fish. HTTP only.",
     authors: [
@@ -125,14 +111,16 @@ export const DATA: Entry[] = [
     ],
   },
   {
-    name: "Make a Wiish",
-    slug: "make-a-wiish",
-    url: "https://wiish.bramdj.dev",
-    description: "Catch a random fish from Wii Play Fishing!",
+    name: "SSH a Fissh",
+    slug: "ssh-a-fissh",
+    url: "https://fissh.breq.dev",
+    condensible: true,
+    description: "Get an ASCII art fish via an SSH connection!",
     authors: [
+      brooke,
       {
-        name: "Bram",
-        url: "https://bramdj.dev",
+        name: "Ava",
+        url: "https://avasilver.dev/",
       },
     ],
     times: [
@@ -147,15 +135,52 @@ export const DATA: Entry[] = [
     ],
   },
   {
-    name: "SSH a Fissh",
-    slug: "ssh-a-fissh",
-    url: "https://fissh.breq.dev",
-    description: "Get an ASCII art fish via an SSH connection!",
-    authors: [
-      brooke,
+    name: "Spin a Fish",
+    slug: "spin-a-fish",
+    url: "https://fish.lftq.dev",
+    condensible: true,
+    description: "A random, spinnable, Minecraft-style 3D fish.",
+    authors: [luke],
+    times: [
       {
-        name: "Ava",
-        url: "https://avasilver.dev/",
+        hour: 11,
+        min: 11,
+      },
+      {
+        hour: 23,
+        min: 11,
+      },
+    ],
+  },
+  {
+    name: "Make 3 Fish",
+    longName: "Fish Multiplexer",
+    slug: "fish-multiplex",
+    condensor: true,
+    url: "https://fishmultiplex.lftq.dev",
+    description:
+      "Get the Make a Fish, SSH a Fish, and Spin a Fish all in one site.",
+    authors: [luke],
+    times: [
+      {
+        hour: 11,
+        min: 11,
+      },
+      {
+        hour: 23,
+        min: 11,
+      },
+    ],
+  },
+  {
+    name: "Make a Wiish",
+    slug: "make-a-wiish",
+    url: "https://wiish.bramdj.dev",
+    description: "Catch a random fish from Wii Play Fishing!",
+    authors: [
+      {
+        name: "Bram",
+        url: "https://bramdj.dev",
       },
     ],
     times: [
