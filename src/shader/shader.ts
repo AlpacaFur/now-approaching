@@ -35,7 +35,11 @@ export function localStorageSync<T extends {}>(
   key: string,
   defaultValue: T
 ): [T, (value: T) => void] {
-  const currentValue = localStorage.getItem(key)
+  const urlParams = new URL(window.location.toString()).searchParams
+
+  const currentValue = urlParams.has(key)
+    ? urlParams.get(key)
+    : localStorage.getItem(key)
 
   const setLocalStorage = (value: T) => {
     localStorage.setItem(key, JSON.stringify(value))

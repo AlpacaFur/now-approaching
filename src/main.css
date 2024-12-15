@@ -92,3 +92,13 @@ key {
   user-select: none;
   cursor: pointer;
 }
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+}
+
+.fadein {
+  animation: fadein 1s ease;
+}

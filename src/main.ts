@@ -13,7 +13,6 @@ import {
 import { secondBasedTimer } from "./animation"
 
 if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
-  console.log("removing")
   document.body.classList.remove("fadein")
 }
 
