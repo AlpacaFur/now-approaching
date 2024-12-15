@@ -117,10 +117,6 @@ export const DATA: Entry[] = [
     url: "https://sequence.breq.dev",
     times: [
       {
-        hour: 0,
-        min: 34,
-      },
-      {
         hour: 12,
         min: 34,
       },
