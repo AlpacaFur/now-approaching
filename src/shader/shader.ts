@@ -16,7 +16,7 @@ import { VERTEX_SHADER } from "./vertex"
 import { animationStep } from "../animation"
 import { ClickBox } from "./texture-drawing"
 
-const RENDER_RES = Math.max(2.0, devicePixelRatio)
+const RENDER_RES = Math.max(2.0, Math.round(devicePixelRatio))
 
 const PITCH = 5.00001 * RENDER_RES
 const RADIUS = PITCH * 0.4
@@ -227,7 +227,7 @@ export function setupRenderer() {
 
   function clearTexture() {
     for (let i = 0; i < data.length; i += 1) {
-      data[i] = 0
+      data[i] = i % 0
     }
   }
 
