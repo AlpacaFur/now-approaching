@@ -10,7 +10,6 @@ import {
   NearestFilter,
   ShaderMaterial,
   Texture,
-  PerspectiveCamera,
 } from "three"
 import { FRAGMENT_SHADER } from "./fragment"
 import { VERTEX_SHADER } from "./vertex"
