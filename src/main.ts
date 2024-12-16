@@ -12,6 +12,8 @@ import {
 } from "./labels"
 import { secondBasedTimer } from "./animation"
 
+const keyRegistry: Record<string, () => void> = {}
+
 if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
   document.body.classList.remove("fadein")
 }
@@ -19,9 +21,8 @@ if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
 const RENDERING_OPTIONS = ["normal", "uv", "festive", "rainbow"] as const
 export interface RenderConfig {
   rendering: (typeof RENDERING_OPTIONS)[number]
-  rainbow: boolean
-  filled: boolean
   condenseFish: boolean
+  twelveHourTime: boolean
 }
 
 const [RENDERING_MODE, setRenderingMode] = localStorageSync<
@@ -33,17 +34,19 @@ const [CONDENSE_FISH, setCondenseFish] = localStorageSync(
   false
 )
 
+const [TWELVE_HOUR, setTwelveHour] = localStorageSync("twelve-hour", false)
+
 const renderConfig: RenderConfig = {
   rendering: RENDERING_MODE,
-  rainbow: false,
-  filled: false,
   condenseFish: CONDENSE_FISH,
+  twelveHourTime: TWELVE_HOUR,
 }
 
 const {
   updateTexture,
   getCanvas,
   toggleShowPixels,
+  pixelsShown,
   adjustBlur,
   updatePitch,
   rerender,
@@ -80,7 +83,10 @@ function regenerateList() {
     .map(({ entry, time }, index): TextBlock[] => {
       const minutesLeft = minutesUntilTime(time)
       const remainingLabel = generateTimeLabel(minutesLeft).padStart(6, " ")
-      const timeLabel = timeDisplay(time).padStart(6, " ")
+      const timeLabel = timeDisplay(time, renderConfig.twelveHourTime).padStart(
+        6,
+        " "
+      )
 
       if (index === 0) {
         document.title = "Next in: " + remainingLabel
@@ -111,11 +117,14 @@ function regenerateList() {
     })
     .slice(0, 8)
 
-  const currentTime = currentTimeDisplay()
+  const currentTime = currentTimeDisplay(renderConfig.twelveHourTime)
 
   const timeShift = NBSP.repeat(charsThatFit - currentTime.length)
 
-  elems.unshift([{ content: timeShift }, { content: currentTime }])
+  elems.unshift([
+    { content: timeShift },
+    { content: currentTime, onClick: toggleTwelveHourTime },
+  ])
 
   renderRows(elems, updateTexture, renderConfig)
 }
@@ -139,17 +148,16 @@ document.body.addEventListener("keypress", (e) => {
     } else {
       document.body.requestFullscreen()
     }
-  } else if (e.key === "r") rotateRendering()
-  else if (e.key === "p") toggleShowPixels()
-  else if (e.key === "m") toggleFishCondensor()
-  else if (e.key === "=") adjustBlur(1)
+  } else if (keyRegistry[e.key]) {
+    keyRegistry[e.key]()
+  } else if (e.key === "=") adjustBlur(1)
   else if (e.key === "-") adjustBlur(-1)
   else if (e.key === ",") {
-    updatePitch(-1)
-    regenerateList()
+    // updatePitch(-1)
+    // regenerateList()
   } else if (e.key === ".") {
-    updatePitch(1)
-    regenerateList()
+    // updatePitch(1)
+    // rerender()
   }
 })
 
@@ -168,12 +176,40 @@ function toggleFishCondensor() {
   regenerateList()
 }
 
-document.getElementById("p-key")!.addEventListener("click", () => {
-  toggleShowPixels()
-})
-document.getElementById("r-key")!.addEventListener("click", () => {
-  rotateRendering()
-})
-document.getElementById("m-key")!.addEventListener("click", () => {
-  toggleFishCondensor()
-})
+function toggleTwelveHourTime() {
+  renderConfig.twelveHourTime = !renderConfig.twelveHourTime
+  setTwelveHour(renderConfig.twelveHourTime)
+  regenerateList()
+}
+
+function registerKeyButton(
+  key: string,
+  clickCallback: () => void,
+  getValue: () => string
+) {
+  const element = document.getElementById(`${key}-key`)!
+  const status = element.querySelector(".status")!
+  const update = () => {
+    status.textContent = `(${getValue()})`
+  }
+  update()
+
+  const press = () => {
+    clickCallback()
+    update()
+  }
+
+  element.addEventListener("click", press)
+  keyRegistry[key] = press
+}
+
+registerKeyButton("p", toggleShowPixels, () =>
+  pixelsShown() ? "shown" : "hidden"
+)
+registerKeyButton("r", rotateRendering, () => renderConfig.rendering)
+registerKeyButton("m", toggleFishCondensor, () =>
+  renderConfig.condenseFish ? "condensed" : "uncondensed"
+)
+registerKeyButton("t", toggleTwelveHourTime, () =>
+  renderConfig.twelveHourTime ? "12-hour" : "24-hour"
+)

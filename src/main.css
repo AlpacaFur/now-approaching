@@ -89,8 +89,21 @@ key {
   padding: 2px 4px;
   border-radius: 2px;
   font-weight: bold;
-  user-select: none;
+}
+
+.key-button {
+  border: 1px solid #444;
+  padding: 10px;
+}
+
+.key-button:hover {
+  background: #444;
   cursor: pointer;
+  user-select: none;
+}
+
+.key-button .status {
+  font-weight: bold;
 }
 
 @keyframes fadein {

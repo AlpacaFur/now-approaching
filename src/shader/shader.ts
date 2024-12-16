@@ -10,6 +10,7 @@ import {
   NearestFilter,
   ShaderMaterial,
   Texture,
+  PerspectiveCamera,
 } from "three"
 import { FRAGMENT_SHADER } from "./fragment"
 import { VERTEX_SHADER } from "./vertex"
@@ -90,7 +91,6 @@ export function setupRenderer() {
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
 
   var geometry = new PlaneGeometry(2, 2)
-
   const [screenWidth, screenHeight] = getWidthHeight()
 
   let { data, texture } = createDataTexturePair(
@@ -251,6 +251,10 @@ export function setupRenderer() {
     animateWipe()
   }
 
+  function pixelsShown() {
+    return wipeDirection === 1
+  }
+
   function rerender() {
     updateTexture(lastUpdater)
   }
@@ -284,9 +288,9 @@ export function setupRenderer() {
   }
 
   function updatePitch(pitch: number) {
-    if (uniforms.PITCH.value === pitch) return
     pitch += 0.00001
     pitch *= RENDER_RES
+    if (uniforms.PITCH.value === pitch) return
     uniforms.PITCH.value = pitch
     uniforms.RADIUS.value = pitch * 0.4
     uniforms.BLUR_DISTANCE.value = pitch * 1.0
@@ -337,6 +341,7 @@ export function setupRenderer() {
     updateTexture,
     getCanvas,
     toggleShowPixels,
+    pixelsShown,
     adjustBlur,
     adjustWipe,
     updatePitch,

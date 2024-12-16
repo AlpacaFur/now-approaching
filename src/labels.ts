@@ -51,14 +51,36 @@ export function widthToChars(
   return { chars: Math.min(charsThatFit, 24), pitch }
 }
 
-export function currentTimeDisplay(): string {
+export function currentTimeDisplay(twelveHour: boolean): string {
   const now = new Date()
-  return timeDisplay({
-    hour: now.getHours(),
-    min: now.getMinutes(),
-  })
+  return timeDisplay(
+    {
+      hour: now.getHours(),
+      min: now.getMinutes(),
+    },
+    twelveHour
+  )
 }
 
-export function timeDisplay(time: StandardTime): string {
-  return `${time.hour}:${String(time.min).padStart(2, "0")}`
+function hourToTwelveHour(hour: number): number {
+  if (hour === 0) return 12
+  else if (hour < 13) return hour
+  else return (hour % 13) + 1
+}
+
+function getAMPM(hour: number): string {
+  if (hour < 12) return "a"
+  return "p"
+}
+
+export function timeDisplay(time: StandardTime, twelveHour: boolean): string {
+  if (twelveHour) {
+    const hour = hourToTwelveHour(time.hour)
+    const minute = time.min.toString().padStart(2, "0")
+    return `${hour}:${minute}${getAMPM(time.hour)}`
+  } else {
+    return `${time.hour.toString().padStart(2, "0")}:${String(
+      time.min
+    ).padStart(2, "0")}`
+  }
 }
