@@ -212,7 +212,14 @@ function registerKeyButton(
 registerKeyButton("p", toggleShowPixels, () =>
   pixelsShown() ? "shown" : "hidden"
 )
-registerKeyButton("r", rotateRendering, () => renderConfig.rendering)
+registerKeyButton(
+  "r",
+  rotateRendering,
+  () =>
+    `${renderConfig.rendering} - ${
+      RENDERING_OPTIONS.indexOf(renderConfig.rendering) + 1
+    }/${RENDERING_OPTIONS.length}`
+)
 registerKeyButton("m", toggleFishCondensor, () =>
   renderConfig.condenseFish ? "condensed" : "uncondensed"
 )
