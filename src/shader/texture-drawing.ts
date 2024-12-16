@@ -11,6 +11,13 @@ const LETTER_HEIGHT = 15
 const LETTER_HEIGHT_WITH_GAP = LETTER_HEIGHT + 1
 const LETTER_HEIGHT_WITH_LINE = LETTER_HEIGHT_WITH_GAP + 2
 
+function xorshift(number: number) {
+  let newNum = number
+  newNum ^= newNum << 13
+  newNum ^= newNum >> 17
+  return newNum
+}
+
 function drawLetterOntoGrid(
   data: Uint8ClampedArray,
   width: number,
@@ -75,6 +82,13 @@ function drawPixelOnGrid(
       data[pixelIndex] = rendering.color[0]
       data[pixelIndex + 1] = rendering.color[1]
       data[pixelIndex + 2] = rendering.color[2]
+    } else if (rendering.type === "color-pick") {
+      const randomishFloat = (xorshift(x * 419 + y) % 255) / 255
+      const index = Math.floor(randomishFloat * rendering.colors.length)
+      const color = rendering.colors[index]
+      data[pixelIndex] = color[0]
+      data[pixelIndex + 1] = color[1]
+      data[pixelIndex + 2] = color[2]
     }
   } else {
     data[pixelIndex] = COLOR[0]
@@ -114,7 +128,12 @@ interface Color extends RenderingBase {
   color: [number, number, number]
 }
 
-type Rendering = Rainbow | Color | Normal
+interface RandomRGB extends RenderingBase {
+  type: "color-pick"
+  colors: [number, number, number][]
+}
+
+type Rendering = Rainbow | Color | RandomRGB | Normal
 
 interface LetterProperties {
   xOrigin: number
@@ -165,6 +184,18 @@ function determineRendering(
     return {
       type: "color",
       color: CASCADE_COLORS[y] ?? [255, 255, 255],
+    }
+  } else if (rendering === "fire") {
+    return {
+      type: "color-pick",
+      colors: [
+        // [255, 0, 0],
+        [255, 40, 0],
+        [255, 80, 0],
+        [255, 140, 0],
+        [220, 220, 0],
+        // [255, 220, 0],
+      ],
     }
   } else {
     return { type: "normal" }

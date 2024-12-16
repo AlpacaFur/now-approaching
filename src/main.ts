@@ -18,7 +18,13 @@ if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
   document.body.classList.remove("fadein")
 }
 
-const RENDERING_OPTIONS = ["normal", "uv", "festive", "rainbow"] as const
+const RENDERING_OPTIONS = [
+  "normal",
+  "uv",
+  "festive",
+  "rainbow",
+  "fire",
+] as const
 export interface RenderConfig {
   rendering: (typeof RENDERING_OPTIONS)[number]
   condenseFish: boolean
