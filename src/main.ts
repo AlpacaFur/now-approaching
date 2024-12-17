@@ -1,151 +1,94 @@
 import "./main.css"
-import { renderRows, TextBlock } from "./shader/texture-drawing"
-import { localStorageSync, setupRenderer } from "./shader/shader"
-import { DATA } from "./data"
-import { minutesUntilTime, nextRealOccurrence } from "./time"
-import {
-  currentTimeDisplay,
-  generateTimeLabel,
-  NBSP,
-  timeDisplay,
-  widthToChars,
-} from "./labels"
+import { renderRows } from "./rendering/texture-drawing"
+import { setupRenderer } from "./rendering/rendering"
+import { widthToChars } from "./labels"
 import { secondBasedTimer } from "./animation"
+import {
+  CONDENSE_FISH,
+  RENDERING_MODE,
+  RENDERING_OPTIONS,
+  rotateRendering,
+  SHOW_PIXELS,
+  toggleFishCondensor,
+  toggleShowPixels,
+  toggleTwelveHourTime,
+  TWELVE_HOUR,
+  type RenderOptions,
+} from "./options"
+import { generateList } from "./generateList"
+import {
+  registerKeyButton,
+  type KeyBinding,
+  type KeyRegistry,
+} from "./keyRegistry"
 
-const keyRegistry: Record<string, () => void> = {}
+export const renderOptions: RenderOptions = {
+  uniforms: {
+    pitch: 5.0,
+  },
+  rendering: RENDERING_MODE,
+  condenseFish: CONDENSE_FISH,
+  twelveHourTime: TWELVE_HOUR,
+  showPixels: SHOW_PIXELS,
+}
 
 if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
   document.body.classList.remove("fadein")
 }
 
-const RENDERING_OPTIONS = [
-  "normal",
-  "uv",
-  "festive",
-  "rainbow",
-  "fire",
-] as const
-export interface RenderConfig {
-  rendering: (typeof RENDERING_OPTIONS)[number]
-  condenseFish: boolean
-  twelveHourTime: boolean
+const { updateTexture, getCanvas, adjustBlur, updatePitch, getWidthHeight } =
+  setupRenderer(renderOptions)
+
+export function regenerate() {
+  const rows = generateList(renderOptions, getWidthHeight())
+  renderRows(rows, updateTexture, renderOptions)
 }
 
-const [RENDERING_MODE, setRenderingMode] = localStorageSync<
-  RenderConfig["rendering"]
->("rendering-mode", "normal")
-
-const [CONDENSE_FISH, setCondenseFish] = localStorageSync(
-  "condense-fish",
-  false
-)
-
-const [TWELVE_HOUR, setTwelveHour] = localStorageSync("twelve-hour", false)
-
-const renderConfig: RenderConfig = {
-  rendering: RENDERING_MODE,
-  condenseFish: CONDENSE_FISH,
-  twelveHourTime: TWELVE_HOUR,
-}
-
-const {
-  updateTexture,
-  getCanvas,
-  toggleShowPixels,
-  pixelsShown,
-  adjustBlur,
-  updatePitch,
-  rerender,
-  getWidthHeight,
-} = setupRenderer()
-
-function regenerateList() {
-  const { chars: charsThatFit, pitch } = widthToChars(...getWidthHeight())
+function resize() {
+  const { pitch } = widthToChars(...getWidthHeight())
   updatePitch(pitch)
-
-  const filteredData = DATA.filter((entry) => {
-    if (renderConfig.condenseFish) {
-      return entry.condensible !== true
-    } else {
-      return entry.condensor !== true
-    }
-  })
-
-  const sortedInstances = filteredData
-    .map((entry) => {
-      return entry.times
-        .map((time) => ({ time, entry }))
-        .map((instance) => ({
-          entry: instance.entry,
-          time: nextRealOccurrence(instance.time),
-        }))
-        .sort((a, b) => minutesUntilTime(a.time) - minutesUntilTime(b.time))[0]
-    })
-    .sort(({ time: timeA }, { time: timeB }) => {
-      return minutesUntilTime(timeA) - minutesUntilTime(timeB)
-    })
-
-  const elems: TextBlock[][] = sortedInstances
-    .map(({ entry, time }, index): TextBlock[] => {
-      const minutesLeft = minutesUntilTime(time)
-      const remainingLabel = generateTimeLabel(minutesLeft).padStart(6, " ")
-      const timeLabel = timeDisplay(time, renderConfig.twelveHourTime).padStart(
-        6,
-        " "
-      )
-
-      if (index === 0) {
-        document.title = "Next in: " + remainingLabel
-      }
-
-      const remaining = charsThatFit - entry.name.length - remainingLabel.length
-
-      const active = remainingLabel.endsWith("BRD")
-      return [
-        {
-          content: entry.name,
-          hoverable: true,
-          active,
-          onClick: () => openURL(entry.url),
-        },
-        { content: " ".repeat(remaining), active },
-        {
-          content: remainingLabel,
-          hoverable: true,
-          hoverContent: timeLabel,
-          onClick: () => {
-            window.location.hash = entry.slug
-          },
-          active,
-        },
-      ]
-      // return entry.name + remainingLabel.padStart(remaining, NBSP)
-    })
-    .slice(0, 8)
-
-  const currentTime = currentTimeDisplay(renderConfig.twelveHourTime)
-
-  const timeShift = NBSP.repeat(charsThatFit - currentTime.length)
-
-  elems.unshift([
-    { content: timeShift },
-    { content: currentTime, onClick: toggleTwelveHourTime },
-  ])
-
-  renderRows(elems, updateTexture, renderConfig)
+  regenerate()
 }
 
-function openURL(url: string) {
-  window.open(url, "_blank")
-}
+const keyRegistry: KeyRegistry = {}
+const keyButtonBindings: KeyBinding[] = [
+  {
+    key: "p",
+    onActivate: toggleShowPixels,
+    getStatus: (options) => (options.showPixels ? "shown" : "hidden"),
+  },
+  {
+    key: "r",
+    onActivate: rotateRendering,
+    getStatus: (options) => {
+      const renderMode = options.rendering
+      const renderModeIndex = RENDERING_OPTIONS.indexOf(renderMode) + 1
+      return `${renderMode} - ${renderModeIndex}/${RENDERING_OPTIONS.length}`
+    },
+  },
+  {
+    key: "m",
+    onActivate: toggleFishCondensor,
+    getStatus: (options) =>
+      options.condenseFish ? "condensed" : "uncondensed",
+  },
+  {
+    key: "t",
+    onActivate: toggleTwelveHourTime,
+    getStatus: (options) => (options.twelveHourTime ? "12-hour" : "24-hour"),
+  },
+]
 
-window.addEventListener("resize", regenerateList)
-regenerateList()
-secondBasedTimer(regenerateList)
-
-document.body.addEventListener("keydown", () => {})
-
-document.getElementById("shader-container")!.append(getCanvas())
+keyButtonBindings.forEach(({ key, onActivate, getStatus }) =>
+  registerKeyButton(
+    key,
+    onActivate,
+    getStatus,
+    keyRegistry,
+    regenerate,
+    renderOptions
+  )
+)
 
 document.body.addEventListener("keypress", (e) => {
   if (e.key === "f") {
@@ -158,71 +101,8 @@ document.body.addEventListener("keypress", (e) => {
     keyRegistry[e.key]()
   } else if (e.key === "=") adjustBlur(1)
   else if (e.key === "-") adjustBlur(-1)
-  else if (e.key === ",") {
-    // updatePitch(-1)
-    // regenerateList()
-  } else if (e.key === ".") {
-    // updatePitch(1)
-    // rerender()
-  }
 })
 
-function rotateRendering() {
-  const currentIndex = RENDERING_OPTIONS.indexOf(renderConfig.rendering)
-  const newRendering =
-    RENDERING_OPTIONS[(currentIndex + 1) % RENDERING_OPTIONS.length]
-  setRenderingMode(newRendering)
-  renderConfig.rendering = newRendering
-  rerender()
-}
-
-function toggleFishCondensor() {
-  renderConfig.condenseFish = !renderConfig.condenseFish
-  setCondenseFish(renderConfig.condenseFish)
-  regenerateList()
-}
-
-function toggleTwelveHourTime() {
-  renderConfig.twelveHourTime = !renderConfig.twelveHourTime
-  setTwelveHour(renderConfig.twelveHourTime)
-  regenerateList()
-}
-
-function registerKeyButton(
-  key: string,
-  clickCallback: () => void,
-  getValue: () => string
-) {
-  const element = document.getElementById(`${key}-key`)!
-  const status = element.querySelector(".status")!
-  const update = () => {
-    status.textContent = `(${getValue()})`
-  }
-  update()
-
-  const press = () => {
-    clickCallback()
-    update()
-  }
-
-  element.addEventListener("click", press)
-  keyRegistry[key] = press
-}
-
-registerKeyButton("p", toggleShowPixels, () =>
-  pixelsShown() ? "shown" : "hidden"
-)
-registerKeyButton(
-  "r",
-  rotateRendering,
-  () =>
-    `${renderConfig.rendering} - ${
-      RENDERING_OPTIONS.indexOf(renderConfig.rendering) + 1
-    }/${RENDERING_OPTIONS.length}`
-)
-registerKeyButton("m", toggleFishCondensor, () =>
-  renderConfig.condenseFish ? "condensed" : "uncondensed"
-)
-registerKeyButton("t", toggleTwelveHourTime, () =>
-  renderConfig.twelveHourTime ? "12-hour" : "24-hour"
-)
+window.addEventListener("resize", resize)
+secondBasedTimer(regenerate)
+document.getElementById("shader-container")!.append(getCanvas())

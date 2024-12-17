@@ -15,10 +15,11 @@ import { FRAGMENT_SHADER } from "./fragment"
 import { VERTEX_SHADER } from "./vertex"
 import { animationStep } from "../animation"
 import { ClickBox } from "./texture-drawing"
+import type { RenderOptions } from "../options"
 
 const RENDER_RES = Math.max(2.0, Math.round(devicePixelRatio))
 
-const PITCH = 5.00001 * RENDER_RES
+const PITCH = 5 * RENDER_RES
 const RADIUS = PITCH * 0.4
 const BLUR_DISTANCE = PITCH * 1.0
 const SECOND_BLUR_DISTANCE = PITCH * 2.4
@@ -31,40 +32,13 @@ export type Updater = (
   hitIndex: number | false
 ) => ClickBox[] | undefined
 
-export function localStorageSync<T extends {}>(
-  key: string,
-  defaultValue: T
-): [T, (value: T) => void] {
-  const urlParams = new URL(window.location.toString()).searchParams
-
-  const currentValue = urlParams.has(key)
-    ? urlParams.get(key)
-    : localStorage.getItem(key)
-
-  const setLocalStorage = (value: T) => {
-    localStorage.setItem(key, JSON.stringify(value))
-  }
-
-  if (currentValue !== null) {
-    return [JSON.parse(currentValue), setLocalStorage]
-  } else {
-    setLocalStorage(defaultValue)
-    return [defaultValue, setLocalStorage]
-  }
-}
-
-export function setupRenderer() {
+export function setupRenderer(renderOptions: RenderOptions) {
   let hitZones: ClickBox[] = []
   let activeHitZone: number | false = false
 
   let lastUpdater: Updater = () => undefined
 
-  const [STARTING_WIPE_POSITION, setStartingWipePosition] = localStorageSync(
-    "starting-wipe-position",
-    0.0
-  )
-
-  let wipeDirection = STARTING_WIPE_POSITION === 0.0 ? -1 : 1
+  let showPixels = renderOptions.showPixels
 
   const renderer = new WebGLRenderer()
   renderer.setPixelRatio(RENDER_RES)
@@ -79,7 +53,6 @@ export function setupRenderer() {
     if (collision !== false) {
       hitZones[collision]?.onClick?.()
     }
-    console.log("clicked", getMouseCollision(e.pageX, e.pageY))
   })
 
   renderer.domElement.addEventListener("mousemove", (e) => {
@@ -130,15 +103,9 @@ export function setupRenderer() {
       value: SECOND_BLUR_DISTANCE,
     },
     WIPE_POSITION: {
-      value: STARTING_WIPE_POSITION,
+      value: showPixels ? 1 : 0,
     },
   }
-
-  console.log(
-    uniforms.u_output_resolution.value,
-    texture.image.width,
-    texture.image.height
-  )
 
   var material = new ShaderMaterial({
     uniforms: uniforms,
@@ -152,9 +119,6 @@ export function setupRenderer() {
   // Add the event listeners
   window.addEventListener("resize", onWindowResize, false)
 
-  /*
-   * Renders the sketch
-   */
   function render() {
     renderer.render(scene, camera)
   }
@@ -231,6 +195,13 @@ export function setupRenderer() {
     }
   }
 
+  function checkForOptionUpdates() {
+    if (renderOptions.showPixels !== showPixels) {
+      showPixels = renderOptions.showPixels
+      animateWipe()
+    }
+  }
+
   function updateTexture(updater: Updater) {
     clearTexture()
     hitZones =
@@ -238,6 +209,7 @@ export function setupRenderer() {
       []
     texture.needsUpdate = true
     lastUpdater = updater
+    checkForOptionUpdates()
     render()
   }
 
@@ -245,22 +217,12 @@ export function setupRenderer() {
     return renderer.domElement
   }
 
-  function toggleShowPixels() {
-    wipeDirection *= -1
-    animateWipe()
-  }
-
-  function pixelsShown() {
-    return wipeDirection === 1
-  }
-
   function rerender() {
     updateTexture(lastUpdater)
   }
 
   function animateWipe() {
-    const targetPosition = wipeDirection === 1 ? 1 : 0
-    setStartingWipePosition(targetPosition)
+    const targetPosition = showPixels ? 1 : 0
     requestAnimationFrame(
       animationStep(
         uniforms.WIPE_POSITION.value,
@@ -287,7 +249,6 @@ export function setupRenderer() {
   }
 
   function updatePitch(pitch: number) {
-    pitch += 0.00001
     pitch *= RENDER_RES
     if (uniforms.PITCH.value === pitch) return
     uniforms.PITCH.value = pitch
@@ -339,8 +300,6 @@ export function setupRenderer() {
     rerender,
     updateTexture,
     getCanvas,
-    toggleShowPixels,
-    pixelsShown,
     adjustBlur,
     adjustWipe,
     updatePitch,

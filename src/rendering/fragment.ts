@@ -76,11 +76,6 @@ vec4 addAlphaColors(vec4 top, vec4 bottom) {
     return vec4(colors, clamp(top.a + bottom.a, 0.0, 1.0));
 }
 
-
-float wiggle(float value) {
-    return max(0.0, value + (sin(value) * 50.0));
-}
-
 bool withinWipe(vec2 coord) {
     float canvasHyp = distance(vec2(0.0, 0.0), u_output_resolution);
     vec2 center = u_output_resolution / 2.0;

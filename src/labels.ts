@@ -1,7 +1,5 @@
-import { LETTER_WIDTH_WITH_GAP } from "./shader/texture-drawing"
+import { LETTER_WIDTH_WITH_GAP } from "./rendering/texture-drawing"
 import { StandardTime } from "./time"
-
-export const NBSP = " "
 
 export function generateTimeLabel(minutes: number) {
   const seconds = new Date().getSeconds()
@@ -32,7 +30,7 @@ export function widthToChars(
     [0, 0, 1],
     [350, 280, 1.1],
     [460, 370, 1.5],
-    [650, 530, 2],
+    [650, 530, 2.1],
     [850, 680, 3],
     [1050, 840, 4],
     [Infinity, Infinity, 5],

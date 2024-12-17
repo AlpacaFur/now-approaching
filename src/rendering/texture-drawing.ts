@@ -1,7 +1,7 @@
 import { CHAR, FONT } from "../font/font"
 import { base64ToBinary } from "../font/helpers"
-import { Updater } from "./shader"
-import { RenderConfig } from "../main"
+import { Updater } from "./rendering"
+import { RenderOptions } from "../options"
 
 const COLOR = [252, 140, 42]
 
@@ -156,7 +156,7 @@ const CASCADE_COLORS: Array<[number, number, number]> = [
 ]
 
 function determineRendering(
-  rendering: RenderConfig["rendering"],
+  rendering: RenderOptions["rendering"],
   { xOrigin, yOrigin, rowsHeight, rowsWidth, y }: LetterProperties
 ): Rendering | false {
   if (rendering === "uv") {
@@ -228,10 +228,12 @@ export interface TextBlock {
   onClick?: () => void
 }
 
+export type TextRow = TextBlock[]
+
 export const renderRows = (
   rows: TextBlock[][],
   updateTexture: (updater: Updater) => void,
-  renderConfig: RenderConfig
+  renderConfig: RenderOptions
 ) => {
   updateTexture((data, width, height, hitIndex) => {
     const rowsHeight = rows.length * LETTER_HEIGHT_WITH_LINE - 2
