@@ -1,7 +1,8 @@
 import { CHAR, FONT } from "../font/font"
 import { base64ToBinary } from "../font/helpers"
+import type { RenderOptions } from "../main"
+import type { RenderMode } from "../options"
 import { Updater } from "./rendering"
-import { RenderOptions } from "../options"
 
 const COLOR = [252, 140, 42]
 
@@ -156,7 +157,7 @@ const CASCADE_COLORS: Array<[number, number, number]> = [
 ]
 
 function determineRendering(
-  rendering: RenderOptions["rendering"],
+  rendering: RenderMode,
   { xOrigin, yOrigin, rowsHeight, rowsWidth, y }: LetterProperties
 ): Rendering | false {
   if (rendering === "uv") {
@@ -263,7 +264,7 @@ export const renderRows = (
         content.split("").forEach((char, origX) => {
           const x = offsetSoFar + origX
 
-          const rendering = determineRendering(renderConfig.rendering, {
+          const rendering = determineRendering(renderConfig.rendering.get(), {
             xOrigin,
             yOrigin,
             rowsHeight,
@@ -317,7 +318,7 @@ export const renderRows = (
           }
 
           const outerStrokeRendering = determineRendering(
-            renderConfig.rendering,
+            renderConfig.rendering.get(),
             {
               xOrigin,
               yOrigin,

@@ -1,47 +1,35 @@
 import "./main.css"
 import { renderRows } from "./rendering/texture-drawing"
-import { setupRenderer } from "./rendering/rendering"
 import { widthToChars } from "./labels"
-import { secondBasedTimer } from "./animation"
-import {
-  CONDENSE_FISH,
-  RENDERING_MODE,
-  RENDERING_OPTIONS,
-  rotateRendering,
-  SHOW_PIXELS,
-  toggleFishCondensor,
-  toggleShowPixels,
-  toggleTwelveHourTime,
-  TWELVE_HOUR,
-  type RenderOptions,
-} from "./options"
 import { generateList } from "./generateList"
 import {
   registerKeyButton,
   type KeyBinding,
   type KeyRegistry,
 } from "./keyRegistry"
+import { newSetupRenderer } from "./newRenderer/adapter"
+import { OptionStore, RENDERING_OPTIONS, type RenderMode } from "./options"
+import { secondBasedTimer } from "./animation"
 
-export const renderOptions: RenderOptions = {
-  uniforms: {
-    pitch: 5.0,
-  },
-  rendering: RENDERING_MODE,
-  condenseFish: CONDENSE_FISH,
-  twelveHourTime: TWELVE_HOUR,
-  showPixels: SHOW_PIXELS,
-}
+export const Options = {
+  showPixels: new OptionStore("show-pixels", false),
+  rendering: new OptionStore<RenderMode>("rendering-mode", "normal"),
+  condenseFish: new OptionStore("condense-fish", false),
+  twelveHourTime: new OptionStore("twelve-hour-time", false),
+} as const
+
+export type RenderOptions = typeof Options
 
 if (!new URL(window.location.toString()).searchParams.has("screensaver")) {
   document.body.classList.remove("fadein")
 }
 
 const { updateTexture, getCanvas, adjustBlur, updatePitch, getWidthHeight } =
-  setupRenderer(renderOptions)
+  newSetupRenderer(Options)
 
 export function regenerate() {
-  const rows = generateList(renderOptions, getWidthHeight())
-  renderRows(rows, updateTexture, renderOptions)
+  const rows = generateList(Options, getWidthHeight(), regenerate)
+  renderRows(rows, updateTexture, Options)
 }
 
 function resize() {
@@ -54,28 +42,36 @@ const keyRegistry: KeyRegistry = {}
 const keyButtonBindings: KeyBinding[] = [
   {
     key: "p",
-    onActivate: toggleShowPixels,
-    getStatus: (options) => (options.showPixels ? "shown" : "hidden"),
+    onActivate: (options) => options.showPixels.set(!options.showPixels.get()),
+    getStatus: (options) => (options.showPixels.get() ? "shown" : "hidden"),
   },
   {
     key: "r",
-    onActivate: rotateRendering,
+    onActivate: (options) => {
+      const currentIndex = RENDERING_OPTIONS.indexOf(options.rendering.get())
+      const newRendering =
+        RENDERING_OPTIONS[(currentIndex + 1) % RENDERING_OPTIONS.length]
+      options.rendering.set(newRendering)
+    },
     getStatus: (options) => {
-      const renderMode = options.rendering
+      const renderMode = options.rendering.get()
       const renderModeIndex = RENDERING_OPTIONS.indexOf(renderMode) + 1
       return `${renderMode} - ${renderModeIndex}/${RENDERING_OPTIONS.length}`
     },
   },
   {
     key: "m",
-    onActivate: toggleFishCondensor,
+    onActivate: (options) =>
+      options.condenseFish.set(!options.condenseFish.get()),
     getStatus: (options) =>
-      options.condenseFish ? "condensed" : "uncondensed",
+      options.condenseFish.get() ? "condensed" : "uncondensed",
   },
   {
     key: "t",
-    onActivate: toggleTwelveHourTime,
-    getStatus: (options) => (options.twelveHourTime ? "12-hour" : "24-hour"),
+    onActivate: (options) =>
+      options.twelveHourTime.set(!options.twelveHourTime.get()),
+    getStatus: (options) =>
+      options.twelveHourTime.get() ? "12-hour" : "24-hour",
   },
 ]
 
@@ -86,7 +82,7 @@ keyButtonBindings.forEach(({ key, onActivate, getStatus }) =>
     getStatus,
     keyRegistry,
     regenerate,
-    renderOptions
+    Options
   )
 )
 
@@ -99,10 +95,12 @@ document.body.addEventListener("keypress", (e) => {
     }
   } else if (keyRegistry[e.key]) {
     keyRegistry[e.key]()
-  } else if (e.key === "=") adjustBlur(1)
-  else if (e.key === "-") adjustBlur(-1)
+  } else if (e.key === "=") adjustBlur()
+  else if (e.key === "-") adjustBlur()
 })
 
-window.addEventListener("resize", resize)
 secondBasedTimer(regenerate)
+
+window.addEventListener("resize", resize)
+resize()
 document.getElementById("shader-container")!.append(getCanvas())

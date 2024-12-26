@@ -5,7 +5,7 @@ import {
   timeDisplay,
   currentTimeDisplay,
 } from "./labels"
-import { type RenderOptions, toggleTwelveHourTime } from "./options"
+import type { RenderOptions } from "./main"
 import type { TextRow } from "./rendering/texture-drawing"
 import { nextRealOccurrence, minutesUntilTime } from "./time"
 
@@ -15,12 +15,13 @@ function openURL(url: string) {
 
 export function generateList(
   renderOptions: RenderOptions,
-  canvasDimensions: [number, number]
+  canvasDimensions: [number, number],
+  regenerate: () => void
 ): TextRow[] {
   const { chars: charsThatFit } = widthToChars(...canvasDimensions)
 
   const filteredData = DATA.filter((entry) => {
-    if (renderOptions.condenseFish) {
+    if (renderOptions.condenseFish.get()) {
       return entry.condensible !== true
     } else {
       return entry.condensor !== true
@@ -47,7 +48,7 @@ export function generateList(
       const remainingLabel = generateTimeLabel(minutesLeft).padStart(6, " ")
       const timeLabel = timeDisplay(
         time,
-        renderOptions.twelveHourTime
+        renderOptions.twelveHourTime.get()
       ).padStart(6, " ")
 
       if (index === 0) {
@@ -78,7 +79,7 @@ export function generateList(
     })
     .slice(0, 8)
 
-  const currentTime = currentTimeDisplay(renderOptions.twelveHourTime)
+  const currentTime = currentTimeDisplay(renderOptions.twelveHourTime.get())
 
   const timeShift = " ".repeat(charsThatFit - currentTime.length)
 
@@ -86,7 +87,10 @@ export function generateList(
     { content: timeShift },
     {
       content: currentTime,
-      onClick: () => toggleTwelveHourTime(renderOptions),
+      onClick: () => {
+        renderOptions.twelveHourTime.set(!renderOptions.twelveHourTime.get())
+        regenerate()
+      },
     },
   ])
 

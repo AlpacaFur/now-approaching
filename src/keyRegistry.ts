@@ -1,4 +1,4 @@
-import type { RenderOptions } from "./options"
+import type { RenderOptions } from "./main"
 
 export type KeyRegistry = Record<string, () => void>
 
