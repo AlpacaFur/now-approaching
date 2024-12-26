@@ -103,4 +103,5 @@ secondBasedTimer(regenerate)
 
 window.addEventListener("resize", resize)
 resize()
+setTimeout(resize, 100)
 document.getElementById("shader-container")!.append(getCanvas())
