@@ -1,7 +1,7 @@
-import type { ClickBox } from "../rendering/texture-drawing"
+import type { ClickBox } from "../rendering/letter-drawing"
 import { getGLContext } from "./shader-setup"
 import { createRenderer } from "./createRenderer"
-import { animationStep } from "../animation"
+import { animationStep } from "../rendering/animation"
 import type { RenderOptions } from "../main"
 
 export const RENDER_RES = Math.max(2.0, Math.round(devicePixelRatio))

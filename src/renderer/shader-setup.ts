@@ -1,6 +1,6 @@
 import type { Uniforms } from "./createRenderer"
-import { FRAGMENT_FORK } from "./fragmentFork"
-import { vertexShaderSource } from "./vertex"
+import { FRAGMENT_SHADER_SOURCE } from "../shaders/fragment"
+import { VERTEX_SHADER_SOURCE } from "../shaders/vertex"
 
 export const RECT_TRIANGLES = [
   -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0,
@@ -55,8 +55,12 @@ export function getGLContext() {
 }
 
 export function assembleProgram(gl: WebGL2RenderingContext) {
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource)
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_FORK)
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER_SOURCE)
+  const fragmentShader = createShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    FRAGMENT_SHADER_SOURCE
+  )
 
   return createProgram(gl, vertexShader, fragmentShader)
 }

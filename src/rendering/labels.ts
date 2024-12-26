@@ -1,5 +1,5 @@
-import { LETTER_WIDTH_WITH_GAP } from "./rendering/texture-drawing"
-import { StandardTime } from "./time"
+import { LETTER_WIDTH_WITH_GAP } from "./letter-drawing"
+import { StandardTime } from "../countdown/time"
 
 export function generateTimeLabel(minutes: number) {
   const seconds = new Date().getSeconds()

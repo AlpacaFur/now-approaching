@@ -1,5 +1,5 @@
 import "./credits.css"
-import { Author, DATA } from "../../data"
+import { Author, DATA } from "../../countdown/data"
 
 function generateCredits(): DocumentFragment {
   const fragment = document.createDocumentFragment()

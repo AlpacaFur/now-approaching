@@ -2,7 +2,13 @@ import { CHAR, FONT } from "../font/font"
 import { base64ToBinary } from "../font/helpers"
 import type { RenderOptions } from "../main"
 import type { RenderMode } from "../options"
-import { Updater } from "./rendering"
+
+export type Updater = (
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+  hitIndex: number | false
+) => ClickBox[] | undefined
 
 const COLOR = [252, 140, 42]
 

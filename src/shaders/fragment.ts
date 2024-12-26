@@ -1,6 +1,9 @@
-export const FRAGMENT_SHADER = `
-uniform sampler2D u_texture;
+export const FRAGMENT_SHADER_SOURCE = `
+precision highp float;
+
+uniform sampler2D u_image;
 uniform vec2 u_output_resolution;
+uniform vec2 u_tex_resolution;
 uniform float PITCH;
 uniform float RADIUS;
 uniform float BRIGHTEN;
@@ -8,9 +11,17 @@ uniform float BLUR_DISTANCE;
 uniform float SECOND_BLUR_DISTANCE;
 uniform float WIPE_POSITION;
 
-varying vec2 v_uv;
-
 const vec4 OFF_CELL = vec4(.08, .08, .08, 1.0);
+
+vec4 getTex(vec2 coord) {
+    vec2 pixel = floor(coord / PITCH) + 0.5;
+
+    if (pixel.x > u_tex_resolution.x || pixel.y > u_tex_resolution.y) {
+        return vec4(0.0, 0.0, 0.0, 0.0);
+    }
+
+    return texture2D(u_image, pixel / u_tex_resolution);
+}
 
 float se_dist(vec2 center, vec2 outer) {
     vec2 adjusted = outer - center;
@@ -19,7 +30,7 @@ float se_dist(vec2 center, vec2 outer) {
 
 vec4 colorContributionFromCell(vec2 cellCenter, vec2 coord) {
     vec2 uv = cellCenter/u_output_resolution;
-    vec4 tex = texture(u_texture, uv);
+    vec4 tex = getTex(cellCenter);
     bool texPresent = tex.r > 0.0 || tex.g > 0.0 || tex.b > 0.0;
     if (!texPresent) {
         return vec4(0.0, 0.0, 0.0, 0.0);
@@ -32,7 +43,9 @@ vec4 colorContributionFromCell(vec2 cellCenter, vec2 coord) {
 
 vec4 blurContributionFromCell(vec2 cellCenter, vec2 coord) {
     vec2 uv = cellCenter/u_output_resolution;
-    vec4 tex = texture(u_texture, uv);
+    vec4 tex = getTex(cellCenter);
+    // vec4 tex = texture2D(u_image, uv);
+
     bool texPresent = tex.r > 0.0 || tex.g > 0.0 || tex.b > 0.0;
     if (!texPresent) {
         return vec4(0.0, 0.0, 0.0, 0.0);
@@ -90,15 +103,28 @@ bool withinWipe(vec2 coord) {
 
 void main()
 {
-    vec2 uv = v_uv;
-    vec2 coord = vec2(u_output_resolution.x*uv.x, u_output_resolution.y*uv.y);
+    vec2 coord = gl_FragCoord.xy;
 
     vec2 cellTopLeft = vec2(floor(coord.x / PITCH) * PITCH, floor(coord.y / PITCH) * PITCH);
     vec2 cellCenter = cellTopLeft + PITCH/2.0;
-    vec4 tex = texture(u_texture, cellCenter/u_output_resolution);
+    vec4 tex = getTex(coord);
 
     if (withinWipe(coord)) {
-        gl_FragColor = vec4(tex.rgb, 1.0);
+        float xLine = 0.0;
+        // if (mod(coord.x, PITCH) < 1.0) {
+        //     xLine = 0.2;
+        // }
+        // if (mod(coord.y, PITCH) < 1.0) {
+        //     xLine = 0.2;
+        // }
+
+        // if (distance(coord, cellCenter) < 1.0) {
+        //     gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+        //     return;
+        // }
+        
+        gl_FragColor = vec4(tex.rgb + xLine, 1.0);
+
         return;
     }
     bool texPresent = tex.r > 0.0 || tex.g > 0.0 || tex.b > 0.0;

@@ -4,9 +4,9 @@ import {
   generateTimeLabel,
   timeDisplay,
   currentTimeDisplay,
-} from "./labels"
-import type { RenderOptions } from "./main"
-import type { TextRow } from "./rendering/texture-drawing"
+} from "../rendering/labels"
+import type { RenderOptions } from "../main"
+import type { TextRow } from "../rendering/letter-drawing"
 import { nextRealOccurrence, minutesUntilTime } from "./time"
 
 function openURL(url: string) {

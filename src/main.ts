@@ -1,15 +1,15 @@
 import "./main.css"
-import { renderRows } from "./rendering/texture-drawing"
-import { widthToChars } from "./labels"
-import { generateList } from "./generateList"
+import { renderRows } from "./rendering/letter-drawing"
+import { widthToChars } from "./rendering/labels"
+import { generateList } from "./countdown/generateList"
 import {
   registerKeyButton,
   type KeyBinding,
   type KeyRegistry,
 } from "./keyRegistry"
-import { newSetupRenderer } from "./newRenderer/adapter"
+import { newSetupRenderer } from "./renderer/adapter"
 import { OptionStore, RENDERING_OPTIONS, type RenderMode } from "./options"
-import { secondBasedTimer } from "./animation"
+import { secondBasedTimer } from "./rendering/animation"
 
 export const Options = {
   showPixels: new OptionStore("show-pixels", false),
