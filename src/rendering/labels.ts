@@ -46,7 +46,7 @@ export function widthToChars(
   const pixelsPerChar = pitch * LETTER_WIDTH_WITH_GAP
   const charsThatFit = Math.floor((width - 40) / pixelsPerChar)
 
-  return { chars: Math.min(charsThatFit, 24), pitch }
+  return { chars: Math.max(19, Math.min(charsThatFit, 24)), pitch }
 }
 
 export function currentTimeDisplay(twelveHour: boolean): string {
