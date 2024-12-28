@@ -40,7 +40,7 @@ export function animationStep(
 }
 
 export function secondBasedTimer(callback: () => void) {
-  callback()
   const timeout = 1000 - new Date().getMilliseconds()
   setTimeout(() => secondBasedTimer(callback), timeout)
+  callback()
 }
