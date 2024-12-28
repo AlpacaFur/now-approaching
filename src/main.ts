@@ -101,7 +101,12 @@ document.body.addEventListener("keypress", (e) => {
 
 secondBasedTimer(regenerate)
 
-window.addEventListener("resize", resize)
+const shaderContainer = document.getElementById("shader-container")!
+
+const resizeObserver = new ResizeObserver(() => {
+  resize()
+})
+resizeObserver.observe(shaderContainer)
+
 resize()
-setTimeout(resize, 100)
-document.getElementById("shader-container")!.append(getCanvas())
+shaderContainer.append(getCanvas())
