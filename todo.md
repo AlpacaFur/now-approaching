@@ -1,0 +1,6 @@
+- [x] time format change - click to toggle 12/24 hour time
+- [x] have proper 24 hour time - with leading zeroes!!
+- [x] show current status next to key display
+- [x] bundle size optimization? maybe use glsl canvas
+- [ ] more color themes!
+- [ ] maybe have some kind of on screen timer for the minute of an event?

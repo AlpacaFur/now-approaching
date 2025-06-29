@@ -7,6 +7,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "./index.html"),
+        vantage: resolve(__dirname, "./vantage.html"),
         canvas: resolve(__dirname, "./demo/canvas.html"),
         credits: resolve(__dirname, "./demo/credits.html"),
         expensive: resolve(__dirname, "./demo/expensive.html"),

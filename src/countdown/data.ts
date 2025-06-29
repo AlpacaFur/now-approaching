@@ -13,6 +13,7 @@ interface Entry {
   condensible?: boolean
   condensor?: boolean
   url: string
+  embeddableUrl?: string
   slug: string
   times: Time[]
 }
@@ -90,6 +91,7 @@ export const DATA: Entry[] = [
     name: "Make a Fish",
     slug: "make-a-fish",
     url: "http://makea.fish",
+    embeddableUrl: "https://fishmultiplex.lftq.dev/makeafish",
     condensible: true,
     description:
       "The original site that sparked it all! Makes a random patterned fish. HTTP only.",

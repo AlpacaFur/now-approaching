@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json?uncache" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Vantage</title>
+</head>
+
+<body>
+  <div class="page-container" style="--accent: #1e90ff">
+    <div class="iframe-container">
+      <iframe id="iframe" frameborder="0" scrolling="no"></iframe>
+      <button id="open-camera">
+        <svg viewBox="0 -960 960 960">
+          <path
+            d="M800-680q-17 0-28.5-11.5T760-720v-40h-40q-17 0-28.5-11.5T680-800q0-17 11.5-28.5T720-840h40v-40q0-17 11.5-28.5T800-920q17 0 28.5 11.5T840-880v40h40q17 0 28.5 11.5T920-800q0 17-11.5 28.5T880-760h-40v40q0 17-11.5 28.5T800-680ZM440-260q75 0 127.5-52.5T620-440q0-75-52.5-127.5T440-620q-75 0-127.5 52.5T260-440q0 75 52.5 127.5T440-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM120-120q-33 0-56.5-23.5T40-200v-480q0-33 23.5-56.5T120-760h126l50-54q11-12 26.5-19t32.5-7h205q17 0 28.5 11.5T600-800v60q0 25 17.5 42.5T660-680h20v20q0 25 17.5 42.5T740-600h60q17 0 28.5 11.5T840-560v360q0 33-23.5 56.5T760-120H120Z" />
+        </svg>
+      </button>
+    </div>
+    <div class="site-label">
+      <p>[</p>
+      <p><span id="site-url">fish.lftq.dev</span> by <span id="site-authors">Brooke & Luke</span></p>
+      <p>]</p>
+    </div>
+    <div id="video-container">
+      <video id="camera">Video stream not available.</video>
+      <div class="top-buttons">
+        <button id="back"><svg viewBox="0 -960 960 960">
+            <path
+              d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z" />
+          </svg></button>
+        <button id="flip-horizontal"><svg viewBox="0 -960 960 960">
+            <path
+              d="m233-320 75 75q11 11 11 27.5T308-189q-12 12-28.5 12T251-189L108-332q-6-6-8.5-13T97-360q0-8 2.5-15t8.5-13l144-144q12-12 28-11.5t28 12.5q11 12 11.5 28T308-475l-75 75h247q17 0 28.5 11.5T520-360q0 17-11.5 28.5T480-320H233Zm494-240H480q-17 0-28.5-11.5T440-600q0-17 11.5-28.5T480-640h247l-75-75q-11-11-11-27.5t11-28.5q12-12 28.5-12t28.5 12l143 143q6 6 8.5 13t2.5 15q0 8-2.5 15t-8.5 13L708-428q-12 12-28 11.5T652-429q-11-12-11.5-28t11.5-28l75-75Z" />
+          </svg></button>
+        <button id="flip-camera"><svg viewBox="0 -960 960 960">
+            <path
+              d="M160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l50-54q11-12 26.5-19t32.5-7h170q17 0 32.5 7t26.5 19l50 54h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm458-304q-6 53-45 88.5T480-300q-8 0-16-1t-16-3q-8-2-17 0t-15 8q-11 11-8 26.5t17 20.5q14 5 27.5 7t27.5 2q79 0 136-53.5T678-426l9 8q9 8 21 8t20-8q9-9 9.5-21.5T729-461l-51-51q-11-11-28-11t-28 11l-51 51q-9 9-9 21t9 21q9 9 21 9t21-9l5-5Zm-336-30-9-8q-9-8-21-8t-20 8q-9 9-9.5 21.5T231-419l51 51q11 11 28 11t28-11l51-51q9-9 9-21t-9-21q-9-9-21-9t-21 9l-5 5q6-53 45-88.5t93-35.5q8 0 16 1t16 3q8 2 17 0t15-8q11-11 8-26.5T535-631q-14-5-27.5-7t-27.5-2q-79 0-136 53.5T282-454Z" />
+          </svg></button>
+        <button id="minimize-camera"><svg viewBox="0 -960 960 960">
+            <path
+              d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z" />
+          </svg></button>
+      </div>
+      <button id="start-camera"></button>
+      <div id="snap-effect"></div>
+    </div>
+  </div>
+  <script></script>
+  <script type="module" src="/src/vantage/vantage.ts"></script>
+</body>
+
+</html>
