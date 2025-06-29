@@ -1,0 +1,7 @@
+- [ ] localstorage camera prefs
+- [ ] fix double flip jank
+- [ ] refresh button
+- [ ] autorefresh
+- [ ] settings/about
+- [ ] PWA-ify
+- [ ] dedicated domain?

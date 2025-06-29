@@ -71,7 +71,7 @@ video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  /* transition: transform 0.5s ease; */
 }
 
 .flip-horizontal {
@@ -179,6 +179,44 @@ video {
 
 .hide-side {
   transform: translateX(50px);
+}
+
+@keyframes unblur {
+  from {
+    filter: blur(10px);
+  }
+}
+
+.unblur {
+  animation: unblur 0.2s ease;
+}
+
+@keyframes flip {
+  from {
+    filter: none;
+    transform: rotateY(0deg);
+  }
+  40% {
+    filter: blur(10px);
+    transform: rotateY(72deg);
+  }
+  50% {
+    transform: rotateY(90deg);
+    filter: blur(10px);
+  }
+  50.1% {
+    transform: rotateY(270deg);
+    filter: blur(10px);
+  }
+  to {
+    transform: rotate(359.99deg);
+    filter: blur(10px);
+  }
+}
+
+.flip {
+  animation: flip 0.5s linear;
+  animation-fill-mode: forwards;
 }
 
 #open-camera {

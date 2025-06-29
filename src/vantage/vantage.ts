@@ -4,7 +4,7 @@ import "./vantage.css"
 let streamEndTimer: ReturnType<typeof setTimeout>
 
 let cameraOpen = true
-let cameraDirection = "environment"
+let cameraDirection: "environment" | "user" = "environment"
 
 const videoElem = document.getElementById("camera") as HTMLVideoElement
 const snapEffectElem = document.getElementById("snap-effect") as HTMLDivElement
@@ -26,13 +26,19 @@ document.getElementById("flip-horizontal")!.addEventListener("click", () => {
   videoElem.classList.toggle("flip-horizontal")
 })
 
-document.getElementById("flip-camera")!.addEventListener("click", () => {
-  if (videoElem.srcObject) {
-    cameraDirection = cameraDirection === "environment" ? "self" : "environment"
-    ;(videoElem.srcObject as MediaStream).getTracks()[0].applyConstraints({
-      facingMode: cameraDirection,
-    })
-  }
+function waitForMs(milliseconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds)
+  })
+}
+
+document.getElementById("flip-camera")!.addEventListener("click", async () => {
+  cameraDirection = cameraDirection === "environment" ? "user" : "environment"
+  videoElem.classList.remove("unblur")
+  videoElem.classList.add("flip")
+  await Promise.all([startStream(cameraDirection), waitForMs(500)])
+  videoElem.classList.remove("flip")
+  videoElem.classList.add("unblur")
 })
 
 document.getElementById("minimize-camera")!.addEventListener("click", () => {
@@ -84,16 +90,18 @@ videoContainerElem.addEventListener("click", () => {
 })
 
 async function startStream(direction: "user" | "environment" = "environment") {
-  try {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: direction,
-      },
-    })
+  const mediaStream = await navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: direction,
+    },
+  })
 
-    videoElem.srcObject = mediaStream
-    videoElem.play()
-  } catch {}
+  const oldSrc = videoElem.srcObject
+  videoElem.srcObject = mediaStream
+  await videoElem.play()
+  if (oldSrc) {
+    ;(oldSrc as MediaStream).getTracks().forEach((track) => track.stop())
+  }
 }
 
 async function start() {
@@ -111,7 +119,7 @@ async function start() {
   const iframeElem = document.getElementById("iframe") as HTMLIFrameElement
   iframeElem.src = targetSite.embeddableUrl ?? targetSite.url
 
-  startStream()
+  startStream().catch(console.error)
   videoContainerElem.classList.add("live")
 }
 
