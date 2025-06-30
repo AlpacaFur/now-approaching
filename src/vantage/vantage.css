@@ -4,6 +4,10 @@
   border: none;
 }
 
+.before-load * {
+  transition: none !important;
+}
+
 :root {
   --background: blue;
 }
