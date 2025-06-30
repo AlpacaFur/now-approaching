@@ -5,18 +5,20 @@
 }
 
 :root {
-  --accent: blue;
+  --background: blue;
 }
 
 body {
   margin: 0px;
+  color: var(--foreground);
+  font-family: sans-serif;
 }
 
-.iframe-container {
+#iframe-container {
   width: 100%;
   height: 100%;
   border: 0px;
-  background: black;
+  background: var(--background);
   flex: 1;
   position: relative;
 }
@@ -70,8 +72,11 @@ video {
   background: black;
   width: 100%;
   height: 100%;
+  object-fit: contain;
+}
+
+video.fit {
   object-fit: cover;
-  /* transition: transform 0.5s ease; */
 }
 
 .flip-horizontal {
@@ -83,20 +88,25 @@ video {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
 }
 
 .site-label {
   text-align: center;
   font-family: sans-serif;
-  /* border: 1px solid white; */
   border-width: 1px 0px;
-  background: #045db6;
+  background: var(--alternate);
   padding: 6px 0px;
-  color: white;
+  color: var(--foreground);
   display: flex;
   justify-content: space-between;
   gap: 5px;
   position: relative;
+}
+
+.site-label a {
+  color: var(--foreground);
 }
 
 .site-label > :not(:nth-child(2)) {
@@ -107,13 +117,13 @@ video {
   font-weight: bold;
 }
 
-#start-camera {
+#take-photo {
   position: absolute;
   bottom: 8px;
   width: 60px;
   height: 60px;
   border-radius: 30px;
-  background: var(--accent);
+  background: var(--background);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,31 +132,31 @@ video {
   transition: transform 0.35s ease;
 }
 
-.live #start-camera {
+.live #take-photo {
   transform: none;
 }
 
-#start-camera:before {
+#take-photo:before {
   content: "";
   position: absolute;
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: 3px solid white;
+  border: 3px solid var(--foreground);
   box-sizing: border-box;
 }
 
-#start-camera:after {
+#take-photo:after {
   content: "";
   position: absolute;
   width: 38px;
   height: 38px;
   border-radius: 50%;
   box-sizing: border-box;
-  background: white;
+  background: var(--foreground);
 }
 
-#start-camera:active:after {
+#take-photo:active:after {
   background: #ffffffcc;
 }
 
@@ -159,7 +169,7 @@ video {
   box-sizing: border-box;
 }
 
-.top-buttons button:first-child {
+.top-buttons button:nth-child(2) {
   margin-right: auto;
 }
 
@@ -167,18 +177,13 @@ video {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  color: white;
-  background: var(--accent);
+  background: var(--background);
   transform: translateY(-50px);
   transition: transform 0.35s ease;
-  fill: white;
+  fill: var(--foreground);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.hide-side {
-  transform: translateX(50px);
 }
 
 @keyframes unblur {
@@ -214,32 +219,91 @@ video {
   }
 }
 
+@keyframes flipReverse {
+  from {
+    filter: none;
+    transform: rotateY(0deg);
+  }
+  40% {
+    filter: blur(10px);
+  }
+  to {
+    transform: rotateY(180deg);
+    filter: blur(10px);
+  }
+}
+
+@keyframes trueFlipReverse {
+  from {
+    filter: none;
+    transform: rotateY(180deg);
+  }
+  40% {
+    filter: blur(10px);
+  }
+  to {
+    transform: rotateY(0deg);
+    filter: blur(10px);
+  }
+}
+
 .flip {
   animation: flip 0.5s linear;
   animation-fill-mode: forwards;
+}
+
+.flip.flip-horizontal {
+  animation: flipReverse 0.5s linear;
+  animation-fill-mode: forwards;
+}
+
+.flip-reverse {
+  animation: trueFlipReverse 0.5s linear;
+  animation-fill-mode: forwards;
+}
+
+#open-camera,
+.side-buttons button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--background);
+
+  transition: transform 0.35s ease;
+  fill: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--foreground);
+}
+
+.side-buttons {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  display: flex;
+  gap: 5px;
+  transition: transform 0.35s ease;
 }
 
 #open-camera {
   position: absolute;
   bottom: 5px;
   right: 5px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  color: white;
-  background: var(--accent);
-
-  transition: transform 0.35s ease;
-  fill: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid white;
 }
 
-#open-camera svg {
+#open-camera svg,
+.side-buttons button svg {
   width: 24px;
   height: 24px;
+}
+
+.hide-side #open-camera {
+  transform: translateX(50px);
+}
+
+.hide-side .side-buttons {
+  transform: translateX(-100px);
 }
 
 .top-buttons svg {
@@ -248,17 +312,92 @@ video {
 }
 
 .top-buttons :nth-child(2) {
-  transition-delay: 50ms;
+  transition-delay: 36ms;
 }
 
 .top-buttons :nth-child(3) {
-  transition-delay: 100ms;
+  transition-delay: 108ms;
 }
 
 .top-buttons :nth-child(4) {
-  transition-delay: 150ms;
+  transition-delay: 144ms;
+}
+
+.top-buttons :nth-child(5) {
+  transition-delay: 180ms;
 }
 
 .live .top-buttons button {
   transform: none;
+}
+
+#settings-menu {
+  position: absolute;
+  right: 5px;
+  background: var(--background);
+  padding: 16px;
+  border-radius: 16px;
+  width: min(240px, calc(100% - 10px));
+  box-sizing: border-box;
+  display: flex;
+  flex-flow: column;
+  gap: 10px;
+  transition: opacity 0.25s ease, transform 0.25s ease,
+    display 0.25s ease allow-discrete;
+  transform: scale(1);
+  transform-origin: top center;
+  z-index: 1;
+}
+
+@starting-style {
+  #settings-menu {
+    transform: scale(0.1);
+    opacity: 0;
+    display: flex;
+  }
+}
+
+#settings-menu.hidden {
+  transform: scale(0.1);
+  opacity: 0;
+  display: none;
+}
+
+.settings-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 20px;
+  margin-top: -6px;
+}
+
+#close-settings {
+  fill: var(--foreground);
+  padding: 10px;
+  margin: -10px;
+  box-sizing: border-box;
+  width: 50px;
+  height: 50px;
+}
+
+#settings-menu label {
+  padding: 6px;
+  border: 1px solid var(--foreground);
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: 6px;
+  border-radius: 6px;
+  align-items: center;
+  color: var(--foreground);
+}
+
+#settings-menu label:has(:checked) {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.credit {
+  font-style: italic;
+  font-size: 14px;
 }

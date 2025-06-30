@@ -9,8 +9,12 @@ import type { RenderOptions } from "../main"
 import type { TextRow } from "../rendering/letter-drawing"
 import { nextRealOccurrence, minutesUntilTime } from "./time"
 
-function openURL(url: string) {
-  window.open(url, "_blank")
+function openURL(url: string, blank: boolean = true) {
+  if (blank) {
+    window.open(url, "_blank")
+  } else {
+    window.location.assign(url)
+  }
 }
 
 export function generateList(
@@ -63,7 +67,9 @@ export function generateList(
           content: entry.name,
           hoverable: true,
           active,
-          onClick: () => openURL(entry.url),
+          onClick: renderOptions.useVantage.get()
+            ? () => openURL(`/vantage?site=${entry.slug}`, false)
+            : () => openURL(entry.url),
         },
         { content: " ".repeat(remaining), active },
         {

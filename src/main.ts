@@ -16,6 +16,7 @@ export const Options = {
   rendering: new OptionStore<RenderMode>("rendering-mode", "normal"),
   condenseFish: new OptionStore("condense-fish", false),
   twelveHourTime: new OptionStore("twelve-hour-time", false),
+  useVantage: new OptionStore("use-vantage", false),
 } as const
 
 export type RenderOptions = typeof Options
@@ -72,6 +73,11 @@ const keyButtonBindings: KeyBinding[] = [
       options.twelveHourTime.set(!options.twelveHourTime.get()),
     getStatus: (options) =>
       options.twelveHourTime.get() ? "12-hour" : "24-hour",
+  },
+  {
+    key: "v",
+    onActivate: (options) => options.useVantage.set(!options.useVantage.get()),
+    getStatus: (options) => (options.useVantage.get() ? "enabled" : "disabled"),
   },
 ]
 

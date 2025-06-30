@@ -1,7 +1,13 @@
-- [ ] localstorage camera prefs
-- [ ] fix double flip jank
-- [ ] refresh button
-- [ ] autorefresh
-- [ ] settings/about
-- [ ] PWA-ify
+- [x] localstorage camera prefs
+- [x] refresh button
+- [x] navigation buttons when camera closed
+- [x] connect site title/authors to slug
+- [x] cover mode toggle
+- [x] settings/about
+- [x] fix double flip jank
+- [x] add accent colors
+- [x] integrate into approaching
+- [x] add make a cat and make a horse
+- [ ] PWA-ify (requires dedicated homepage)
 - [ ] dedicated domain?
+- [ ] autorefresh?
