@@ -229,5 +229,7 @@ async function start() {
   videoContainerElem.classList.add("live")
 }
 
-document.body.classList.remove("before-load")
+setTimeout(() => {
+  document.body.classList.remove("before-load")
+}, 50)
 start()
