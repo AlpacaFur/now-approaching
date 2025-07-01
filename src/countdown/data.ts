@@ -19,6 +19,7 @@ export interface Entry {
     lightText: boolean
   }
   embeddableUrl?: string
+  embedNeedsResize?: boolean
   displayUrl?: string
   slug: string
   times: Time[]
@@ -198,6 +199,7 @@ export const DATA: Entry[] = [
     slug: "ssh-a-fissh",
     url: "https://fissh.breq.dev",
     embeddableUrl: "https://webssh.lftq.dev",
+    embedNeedsResize: true,
     condensible: true,
     description: "Get an ASCII art fish via an SSH connection!",
     color: {

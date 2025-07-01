@@ -25,6 +25,8 @@ body {
   background: var(--background);
   flex: 1;
   position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 iframe {
@@ -405,4 +407,13 @@ video.fit {
 .credit {
   font-style: italic;
   font-size: 14px;
+}
+
+@media (max-width: 520px) {
+  iframe {
+    transform-origin: top left;
+    transform: scale(0.7);
+    width: 142.85714286%;
+    height: 142.85714286%;
+  }
 }

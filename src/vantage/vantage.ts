@@ -220,6 +220,10 @@ async function start() {
 
   siteIFrameElem.src = targetSite.embeddableUrl ?? targetSite.url
 
+  if (targetSite.embedNeedsResize) {
+    siteIFrameElem.classList.add("resize-med")
+  }
+
   if (cameraOpen.get()) {
     startStream(cameraDirection.get()).catch(console.error)
   } else {
