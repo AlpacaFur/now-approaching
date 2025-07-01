@@ -147,6 +147,7 @@ video.fit {
   height: 52px;
   border-radius: 50%;
   border: 3px solid var(--foreground);
+  background: var(--background);
   box-sizing: border-box;
 }
 
@@ -157,11 +158,11 @@ video.fit {
   height: 38px;
   border-radius: 50%;
   box-sizing: border-box;
-  background: var(--foreground);
+  background: white;
 }
 
 #take-photo:active:after {
-  background: #ffffffcc;
+  opacity: 0.8;
 }
 
 .top-buttons {

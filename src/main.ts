@@ -75,7 +75,7 @@ const keyButtonBindings: KeyBinding[] = [
       options.twelveHourTime.get() ? "12-hour" : "24-hour",
   },
   {
-    key: "v",
+    key: "c",
     onActivate: (options) => options.useVantage.set(!options.useVantage.get()),
     getStatus: (options) => (options.useVantage.get() ? "enabled" : "disabled"),
   },
