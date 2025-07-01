@@ -68,7 +68,7 @@ export function generateList(
           hoverable: true,
           active,
           onClick: renderOptions.useVantage.get()
-            ? () => openURL(`/vantage?site=${entry.slug}`, false)
+            ? () => openURL(`/camera-mode?site=${entry.slug}`, false)
             : () => openURL(entry.url),
         },
         { content: " ".repeat(remaining), active },
