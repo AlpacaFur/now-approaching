@@ -224,6 +224,8 @@ async function start() {
     siteIFrameElem.classList.add("resize-med")
   }
 
+  document.title = `Camera Mode - ${targetSite.longName ?? targetSite.name}`
+
   if (cameraOpen.get()) {
     startStream(cameraDirection.get()).catch(console.error)
   } else {
