@@ -40,14 +40,14 @@ export function newSetupRenderer(options: RenderOptions) {
   })
 
   canvas.addEventListener("click", (e) => {
-    const collision = getMouseCollision(e.pageX, e.pageY)
+    const collision = getMouseCollision(e.offsetX, e.offsetY)
     if (collision !== false) {
       hitZones[collision]?.onClick?.()
     }
   })
 
   canvas.addEventListener("mousemove", (e) => {
-    handleMouseCollision(e.pageX, e.pageY)
+    handleMouseCollision(e.offsetX, e.offsetY)
   })
 
   function getMouseCollision(origX: number, origY: number): number | false {

@@ -115,3 +115,17 @@ key {
 .fadein {
   animation: fadein 1s ease;
 }
+
+@keyframes huemania {
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.april-flips {
+  animation: huemania 5s linear infinite;
+  transform: rotate(180deg);
+}
