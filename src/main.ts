@@ -114,7 +114,8 @@ const resizeObserver = new ResizeObserver(() => {
 })
 resizeObserver.observe(shaderContainer)
 
-if (new Date().toISOString().includes("-04-01T")) {
+const now = new Date()
+if (now.getDate() === 1 && now.getMonth() + 1 === 4) {
   shaderContainer.classList.add("april-flips")
 }
 
