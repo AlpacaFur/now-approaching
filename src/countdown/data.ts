@@ -136,6 +136,34 @@ export const DATA: Entry[] = [
     ],
   },
   {
+    name: "Make a Slush",
+    longName: "Make a Slurpee",
+    slug: "make-a-slurpee",
+    url: "https://philo.gay/slush/index.html",
+    description: "Generate a random 7/11 slurpee!",
+    color: {
+      accent: "#fff",
+      alternate: "#ccc",
+      lightText: false,
+    },
+    authors: [
+      {
+        name: "Philo",
+        url: "https://philo.gay/",
+      },
+    ],
+    times: [
+      {
+        hour: 7,
+        min: 11,
+      },
+      {
+        hour: 19,
+        min: 11,
+      },
+    ],
+  },
+  {
     name: "Dial a Fish",
     slug: "dial-a-fish",
     url: "https://queercomputerclub.ca/projects/quecey-voip/",
