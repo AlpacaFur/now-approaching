@@ -195,11 +195,10 @@ export const DATA: Entry[] = [
   {
     name: "Make a Fish",
     slug: "make-a-fish",
-    url: "http://makea.fish",
-    embeddableUrl: "https://fishmultiplex.lftq.dev/makeafish",
+    url: "https://weepingwitch.github.io/maf",
     condensible: true,
     description:
-      "The original site that sparked it all! Makes a random patterned fish. HTTP only.",
+      "The original site that sparked it all! Makes a random patterned fish.",
     color: {
       accent: "#0000ff",
       alternate: "#020299",
